@@ -1,0 +1,16 @@
+:ems:
+  :ems_embedded_terraform:
+    :blacklisted_event_names: []
+    :event_handling:
+      :event_groups:
+:ems_refresh:
+  :embedded_terraform:
+    :refresh_interval: 15.minutes
+:http_proxy:
+  :embedded_terraform:
+    :host:
+    :password:
+    :port:
+    :user:
+:log:
+  :level_embedded_terraform: info
