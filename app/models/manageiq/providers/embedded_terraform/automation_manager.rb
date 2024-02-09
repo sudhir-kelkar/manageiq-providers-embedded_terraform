@@ -1,0 +1,16 @@
+class ManageIQ::Providers::EmbeddedTerraform::AutomationManager < ManageIQ::Providers::EmbeddedAutomationManager
+  supports_not :refresh_ems
+
+  def self.hostname_required?
+    # TODO: ExtManagementSystem is validating this
+    false
+  end
+
+  def self.ems_type
+    @ems_type ||= "embedded_terraform".freeze
+  end
+
+  def self.description
+    @description ||= "Embedded Terraform".freeze
+  end
+end
