@@ -26,6 +26,10 @@ module ManageIQ
         def self.apply_logger_config(config)
           Vmdb::Loggers.apply_config_value(config, $embedded_terraform_log, :level_embedded_terraform)
         end
+
+        def self.seedable_classes
+          %w[ManageIQ::Providers::EmbeddedTerraform]
+        end
       end
     end
   end
