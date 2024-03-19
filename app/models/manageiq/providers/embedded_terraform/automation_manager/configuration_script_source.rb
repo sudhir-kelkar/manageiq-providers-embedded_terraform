@@ -18,7 +18,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
           next if filename.start_with?(".") || !filename.end_with?(".tf")
 
           payload = worktree.read_file(filename)
-          found   = current.delete(filename) || self.class.module_parent::ConfigurationScriptPayload.new(:configuration_script_source_id => id)
+          found   = current.delete(filename) || self.class.module_parent::Template.new(:configuration_script_source_id => id)
 
           found.update!(:name => filename, :manager_id => manager_id, :payload => payload, :payload_type => "json")
         end
