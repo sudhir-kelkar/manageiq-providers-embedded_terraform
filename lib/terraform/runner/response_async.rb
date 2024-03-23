@@ -3,25 +3,43 @@ module Terraform
     class ResponseAsync
       include Vmdb::Logging
 
-      attr_reader :response, :debug
-
-      # Response object designed for holding full response from terraform-runner
+      # Response object designed for holding full response from terraform-runner stack job
       #
-      # @param response [Object] Terraform::Runner::Response object
-      # @param debug [Boolean] whether or not to delete base_dir after run (for debugging)
-      def initialize(response, debug: false)
-        @response = response
-        @debug    = debug
+      # @param stack_id [String] terraform-runner stack job - stack_id
+      def initialize(stack_id)
+        @stack_id = stack_id
       end
 
-      # @return [Boolean] true if the terraform job is still running, false when it's finished
+      # @return [Boolean] true if the terraform stack job is still running, false when it's finished
       def running?
-        response.status == "IN_PROGRESS"
+        return (@response.status == "" || @response.status == "IN_PROGRESS") if @response
+
+        false
       end
 
       # Stops the running Terraform job
       def stop
-        raise NotImplementedError, "Not yet impleted"
+        raise Error, "Not yet running" if !running?
+
+        Terraform::Runner.stop_async(@response.stack_id)
+      end
+
+      # Re-Fetch async job's response
+      def refresh_response
+        @response = Terraform::Runner.fetch_result_by_stack_id(@stack_id)
+
+        @response
+      end
+
+      # @return [Terraform::Runner::Response, NilClass] Response object with all details about the Terraform run, or nil
+      #         if the Terraform is still running
+      def response
+        # return if running?
+        return @response if @response
+
+        @response = Terraform::Runner.fetch_result_by_stack_id(@stack_id)
+
+        @response
       end
     end
   end
