@@ -1,10 +1,10 @@
 # ManageIQ::Providers::EmbeddedTerraform
 
 [![CI](https://github.com/ManageIQ/manageiq-providers-embedded_terraform/actions/workflows/ci.yaml/badge.svg)](https://github.com/ManageIQ/manageiq-providers-embedded_terraform/actions/workflows/ci.yaml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/<badge_token>/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-providers-embedded_terraform/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/<badge_token>/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-providers-embedded_terraform/test_coverage)
-
+[![Code Climate](https://codeclimate.com/github/ManageIQ/manageiq-providers-embedded_terraform.svg)](https://codeclimate.com/github/ManageIQ/manageiq-providers-embedded_terraform)
+[![Test Coverage](https://codeclimate.com/github/ManageIQ/manageiq-providers-embedded_terraform/badges/coverage.svg)](https://codeclimate.com/github/ManageIQ/manageiq-providers-embedded_terraform/coverage)
 [![Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ManageIQ/manageiq-providers-embedded_terraform?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 ManageIQ plugin for the Embedded Terraform provider.
 
