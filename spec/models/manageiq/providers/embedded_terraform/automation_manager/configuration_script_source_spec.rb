@@ -1,7 +1,7 @@
 RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource do
   context "with a local repo" do
     let(:manager) do
-      FactoryBot.create(:provider_embedded_terraform, :default_organization => 1).managers.first
+      FactoryBot.create(:provider_embedded_terraform).managers.first
     end
 
     let(:params) do
