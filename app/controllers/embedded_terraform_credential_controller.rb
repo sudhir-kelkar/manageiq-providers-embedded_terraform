@@ -30,15 +30,49 @@ class EmbeddedTerraformCredentialController < ApplicationController
 
   def button
     case params[:pressed]
+    when "embedded_terraform_repositories_reload"
+      javascript_redirect(:action => 'show', :id => params[:id], :display => 'repositories')
+    when 'embedded_configuration_script_source_refresh' # refresh repositories from nested list
+      repository_refresh
     when 'embedded_automation_manager_credentials_add'
       javascript_redirect(:action => 'new')
+    when 'embedded_configuration_script_source_add' # add repository from nested list
+      javascript_redirect(:controller => 'embedded_terraform_repository', :action => 'new')
     when 'embedded_automation_manager_credentials_edit'
       javascript_redirect(:action => 'edit', :id => params[:miq_grid_checks])
+    when 'embedded_configuration_script_source_edit' # edit repository from nested list
+      javascript_redirect(:controller => 'embedded_terraform_repository', :action => 'edit', :id => params[:miq_grid_checks])
     when 'ansible_credential_tag'
       tag(self.class.model)
-    when "embedded_terraform_repository_tag" # repositories from nested list
+    when "ansible_repository_tag" # repositories from nested list
       tag(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource)
     end
+  end
+
+  def check_button_rbac
+    # Allow reload for the repositories nested list to skip RBAC check
+    if %w[embedded_terraform_repositories_reload].include?(params[:pressed])
+      true
+    else
+      super
+    end
+  end
+
+  def repository_refresh
+    assert_privileges("embedded_configuration_script_source_refresh")
+    checked = find_checked_items
+    checked[0] = params[:id] if checked.blank? && params[:id]
+
+    EmbeddedTerraformRepositoryController.model.where(:id => checked).each do |repo|
+      repo.sync_queue
+      add_flash(_("Refresh of Repository \"%{name}\" was successfully initiated.") % {:name => repo.name})
+    rescue StandardError => ex
+      add_flash(_("Unable to refresh Repository \"%{name}\": %{details}") % {:name    => repo.name,
+                                                                             :details => ex},
+                :error)
+    end
+
+    javascript_flash
   end
 
   def new

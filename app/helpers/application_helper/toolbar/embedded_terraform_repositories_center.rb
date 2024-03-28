@@ -25,7 +25,6 @@ class ApplicationHelper::Toolbar::EmbeddedTerraformRepositoriesCenter < Applicat
                        N_('Refresh Selected Terraform Repositories'),
                        N_('Refresh Selected Terraform Repositories'),
                        :klass        => ApplicationHelper::Button::EmbeddedTerraform,
-                       :url          => "repository_refresh",
                        :confirm      => N_("Refresh selected Terraform Repositories?"),
                        :enabled      => false,
                        :url_parms    => 'unused_div',
