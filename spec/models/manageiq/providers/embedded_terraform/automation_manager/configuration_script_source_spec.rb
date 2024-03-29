@@ -128,8 +128,8 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
 
         it "deletes existing records" do
           # build using the first fake repo
-          record           = build_record
-          existing_id     = record.configuration_script_payloads.first.id
+          record      = build_record
+          existing_id = record.configuration_script_payloads.first.id
 
           # create a new fake repo and associate it with our repo
           Spec::Support::FakeTerraformRepo.generate(nested_repo, nested_repo_structure)
@@ -137,7 +137,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
           record.sync
 
           # verify the original payload is removed
-          new_ids     = record.configuration_script_payloads.pluck(:id)
+          new_ids = record.configuration_script_payloads.pluck(:id)
           expect(new_ids).to be_present
           expect(new_ids).to_not include(existing_id)
         end
@@ -193,8 +193,8 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
     end
 
     describe "#template_name_from_git_repo_url" do
-      let(:git_url_branch_path)   { ["git@example.com:manoj-puthran/sample-scripts.git", "v2.0", "terraform/templates/hello-world"]}
-      let(:https_url_branch_path) { ["https://example.com/manoj-puthran/sample-scripts.git", "v2.0", "terraform/templates/hello-world"]}
+      let(:git_url_branch_path)   { ["git@example.com:manoj-puthran/sample-scripts.git", "v2.0", "terraform/templates/hello-world"] }
+      let(:https_url_branch_path) { ["https://example.com/manoj-puthran/sample-scripts.git", "v2.0", "terraform/templates/hello-world"] }
       let(:expected_result)       { "hello-world(v2.0):example.com/manoj-puthran/sample-scripts/terraform/templates" }
 
       it "supports https urls" do
@@ -251,9 +251,9 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
 
           expect(result).to be_a(described_class)
           expect(result).to have_attributes(
-            :scm_type          => "git",
-            :scm_branch        => "other_branch",
-            :status            => "error"
+            :scm_type   => "git",
+            :scm_branch => "other_branch",
+            :status     => "error"
           )
           expect(result.last_updated_on).to be_within(2.seconds).of(Time.now.utc)
           expect(result.last_update_error).to start_with("Rugged::NetworkError")
