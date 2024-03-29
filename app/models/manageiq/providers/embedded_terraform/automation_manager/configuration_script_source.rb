@@ -5,6 +5,10 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
     n_('Repository (Embedded Terraform)', 'Repositories (Embedded Terraform)', number)
   end
 
+  private_class_method def self.queue_role
+    "embedded_terraform"
+  end
+
   def sync
     update!(:status => "running")
 
