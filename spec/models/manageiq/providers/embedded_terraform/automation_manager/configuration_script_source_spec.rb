@@ -190,6 +190,60 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
           expect(payloads).to match_array([expected_hash1.to_json, expected_hash2.to_json])
         end
       end
+
+      context "with other files in the template dir" do
+        let(:nested_repo) { File.join(clone_dir, "hello_world_nested") }
+
+        let(:nested_repo_structure) do
+          %w[
+            templates/hello-world/main.tf
+            templates/hello-world/outputs.tf
+            templates/hello-world/variables.tf
+          ]
+        end
+
+        it "finds all associated files" do
+          Spec::Support::FakeTerraformRepo.generate(nested_repo, nested_repo_structure)
+
+          params[:scm_url] = "file://#{nested_repo}"
+          record           = build_record
+
+          names_and_payloads = record.configuration_script_payloads.pluck(:name, :payload)
+
+          names = names_and_payloads.collect(&:first)
+          payloads = names_and_payloads.collect(&:second)
+
+          expect(names.first).to(eq("hello-world(master):#{nested_repo}/templates"))
+
+          files = JSON.parse(payloads.first)["files"]
+
+          expect(files).to match_array(%w[main.tf outputs.tf variables.tf])
+        end
+      end
+
+      context "with directories that don't have terraform templates" do
+        let(:nested_repo) { File.join(clone_dir, "hello_world_nested") }
+
+        let(:nested_repo_structure) do
+          %w[
+            templates/hello-world/main.tf
+            templates/hello-world/outputs.tf
+            templates/hello-world/variables.tf
+            workflows/testing/testing.asl
+            docs/README.md
+          ]
+        end
+
+        it "ignores directories without terraform templates" do
+          Spec::Support::FakeTerraformRepo.generate(nested_repo, nested_repo_structure)
+
+          params[:scm_url] = "file://#{nested_repo}"
+          record           = build_record
+
+          names = record.configuration_script_payloads.pluck(:name)
+          expect(names).to match_array(["hello-world(master):#{nested_repo}/templates"])
+        end
+      end
     end
 
     describe "#template_name_from_git_repo_url" do
