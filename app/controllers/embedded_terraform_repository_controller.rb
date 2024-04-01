@@ -122,7 +122,7 @@ class EmbeddedTerraformRepositoryController < ApplicationController
   end
 
   def toolbar
-    return 'embedded_terraform_templates_center' if %w[embedded_terraform_templates].include?(@display) # for nested list screen
+    return 'embedded_terraform_templates_center' if %w[templates].include?(@display) # for nested list screen
 
     %w[show_list].include?(@lastaction) ? 'embedded_terraform_repositories_center' : 'embedded_terraform_repository_center'
   end
