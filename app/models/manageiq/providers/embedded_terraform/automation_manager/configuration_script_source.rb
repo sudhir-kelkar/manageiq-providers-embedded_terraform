@@ -76,31 +76,21 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
   def find_templates_in_git_repo
     template_dirs = {}
 
-    # checkout files to temp dir, we need for parsing input/output vars
-    git_checkout_tempdir = Dir.mktmpdir("terraform-git")
-    checkout_git_repository(git_checkout_tempdir)
-
     # traverse through files in git-worktree
+    git_repository.update_repo
     git_repository.with_worktree do |worktree|
       worktree.ref = scm_branch
 
       # Find all dir's with .tf/.tf.json files
-      worktree.blob_list.each do |filepath|
-        next unless filepath.end_with?(".tf", ".tf.json")
-
-        parent_dir = File.dirname(filepath)
-        name = self.class.template_name_from_git_repo_url(
-          git_repository.url, scm_branch, parent_dir
-        )
-
-        next if template_dirs.key?(name)
-
-        full_path = File.join(git_checkout_tempdir, parent_dir)
-        _log.debug("Local full path : #{full_path}")
-        files = Dir.children(full_path)
+      worktree.blob_list
+              .group_by          { |file| File.dirname(file) }
+              .select            { |_dir, files| files.any? { |f| f.end_with?(".tf", ".tf.json") } }
+              .transform_values! { |files| files.map { |f| File.basename(f) } }
+              .each do |parent_dir, files|
+        name = self.class.template_name_from_git_repo_url(git_repository.url, scm_branch, parent_dir)
 
         # TODO: add parsing for input/output vars
-        input_vars = nil
+        input_vars  = nil
         output_vars = nil
 
         template_dirs[name] = {
@@ -109,13 +99,9 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
           :input_vars    => input_vars,
           :output_vars   => output_vars
         }
-        _log.debug("=== Add Template:#{name}")
       end
     end
 
     template_dirs
-  ensure
-    # cleanup temp git directory
-    FileUtils.rm_rf(git_checkout_tempdir) if git_checkout_tempdir
   end
 end
