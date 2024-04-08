@@ -19,6 +19,8 @@ class OpentofuWorker < MiqWorker
     MiqWorkerType::KILL_PRIORITY_GENERIC_WORKERS
   end
 
+  private
+
   # There can only be a single instance running so the unit name can just be
   # "opentofu-runner.service"
   def unit_instance
@@ -38,25 +40,11 @@ class OpentofuWorker < MiqWorker
     create_podman_secret
   end
 
-  def unit_config_file
-    # Override this in a sub-class if the specific instance needs
-    # any additional config
-    <<~UNIT_CONFIG_FILE
-      [Service]
-      MemoryHigh=#{worker_settings[:memory_threshold].bytes}
-      TimeoutStartSec=#{worker_settings[:starting_timeout]}
-      TimeoutStopSec=#{worker_settings[:stopping_timeout]}
-      #{unit_environment_variables.map { |env_var| "Environment=#{env_var}" }.join("\n")}
-    UNIT_CONFIG_FILE
-  end
-
   def unit_environment_variables
-    database_config = ActiveRecord::Base.connection_db_config.configuration_hash
-
     [
-      "DATABASE_HOSTNAME=#{database_config[:host]}",
-      "DATABASE_NAME=#{database_config[:database]}",
-      "DATABASE_USERNAME=#{database_config[:username]}",
+      "DATABASE_HOSTNAME=#{database_configuration[:host]}",
+      "DATABASE_NAME=#{database_configuration[:database]}",
+      "DATABASE_USERNAME=#{database_configuration[:username]}",
       "MEMCACHED_SERVER=#{::Settings.session.memcache_server}"
     ]
   end
@@ -64,9 +52,12 @@ class OpentofuWorker < MiqWorker
   def create_podman_secret
     return if AwesomeSpawn.run("runuser", :params => [[:login, "manageiq"], [:command, "podman secret exists --root=#{Rails.root.join("data/containers/storage")} opentofu-runner-secret"]]).success?
 
-    database_password = ActiveRecord::Base.connection_db_config.configuration_hash[:password]
-    secret = {"DATABASE_PASSWORD" => database_password}
+    secret = {"DATABASE_PASSWORD" => database_configuration[:password]}
 
     AwesomeSpawn.run!("runuser", :params => [[:login, "manageiq"], [:command, "podman secret create --root=#{Rails.root.join("data/containers/storage")} opentofu-runner-secret -"]], :in_data => secret.to_json)
+  end
+
+  def database_configuration
+    ActiveRecord::Base.connection_db_config.configuration_hash
   end
 end

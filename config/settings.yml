@@ -16,4 +16,5 @@
   :level_embedded_terraform: info
 :workers:
   :worker_base:
-    :opentofu_worker: {}
+    :opentofu_worker:
+      :heartbeat_timeout:
