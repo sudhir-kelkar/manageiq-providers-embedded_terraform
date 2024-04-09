@@ -41,12 +41,12 @@ class OpentofuWorker < MiqWorker
   end
 
   def unit_environment_variables
-    [
-      "DATABASE_HOSTNAME=#{database_configuration[:host]}",
-      "DATABASE_NAME=#{database_configuration[:database]}",
-      "DATABASE_USERNAME=#{database_configuration[:username]}",
-      "MEMCACHED_SERVER=#{::Settings.session.memcache_server}"
-    ]
+    {
+      "DATABASE_HOSTNAME" => database_configuration[:host],
+      "DATABASE_NAME"     => database_configuration[:database],
+      "DATABASE_USERNAME" => database_configuration[:username],
+      "MEMCACHED_SERVER"  => ::Settings.session.memcache_server
+    }
   end
 
   def create_podman_secret
