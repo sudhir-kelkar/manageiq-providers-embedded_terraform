@@ -83,7 +83,7 @@ module Terraform
       private
 
       def server_url
-        ENV['TERRAFORM_RUNNER_URL'] || 'https://opentofu-runner:27000'
+        ENV.fetch('TERRAFORM_RUNNER_URL', 'https://opentofu-runner:27000')
       end
 
       def server_token
@@ -91,15 +91,11 @@ module Terraform
       end
 
       def stack_job_interval_in_secs
-        ENV['TERRAFORM_RUNNER_STACK_JOB_CHECK_INTERVAL'].to_i
-      rescue
-        10
+        ENV.fetch('TERRAFORM_RUNNER_STACK_JOB_CHECK_INTERVAL', 10).to_i
       end
 
       def stack_job_max_time_in_secs
-        ENV['TERRAFORM_RUNNER_STACK_JOB_MAX_TIME'].to_i
-      rescue
-        120
+        ENV.fetch('TERRAFORM_RUNNER_STACK_JOB_MAX_TIME', 120).to_i
       end
 
       # Create to paramaters as used by terraform-runner api
