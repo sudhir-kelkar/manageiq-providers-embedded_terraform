@@ -1,4 +1,4 @@
-require 'rest-client'
+require 'faraday'
 require 'timeout'
 require 'tempfile'
 require 'zip'
@@ -10,8 +10,8 @@ module Terraform
       def available?
         return @available if defined?(@available)
 
-        response = terraform_runner_client['api/terraformjobs/count'].get
-        @available = response.code == 200
+        response = terraform_runner_client.get('api/terraformjobs/count')
+        @available = response.status == 200
       rescue
         @available = false
       end
@@ -116,14 +116,17 @@ module Terraform
 
       # create http client for terraform-runner rest-api
       def terraform_runner_client
-        # TODO: verify ssl
-        verify_ssl = false
+        @terraform_runner_client ||= begin
+          # TODO: verify ssl
+          verify_ssl = false
 
-        RestClient::Resource.new(
-          server_url,
-          :headers    => {:authorization => "Bearer #{server_token}"},
-          :verify_ssl => verify_ssl
-        )
+          Faraday.new(
+            :url => server_url,
+            :ssl => {:verify => verify_ssl}
+          ) do |builder|
+            builder.request(:authorization, 'Bearer', -> { server_token })
+          end
+        end
       end
 
       def stack_tenant_id
@@ -154,8 +157,10 @@ module Terraform
           }
         )
         # _log.debug("Payload:>\n, #{payload}")
-        http_response = terraform_runner_client['api/stack/create'].post(
-          payload, :content_type => 'application/json'
+        http_response = terraform_runner_client.post(
+          "api/stack/create",
+          payload,
+          "Content-Type" => "application/json"
         )
         _log.debug("==== http_response.body: \n #{http_response.body}")
         _log.info("stack_job for template: #{template_path} running ...")
@@ -164,13 +169,11 @@ module Terraform
 
       # Retrieve TerraformRunner Stack Job details
       def retrieve_stack_job(stack_id)
-        payload = JSON.generate(
-          {
-            :stack_id => stack_id
-          }
-        )
-        http_response = terraform_runner_client['api/stack/retrieve'].post(
-          payload, :content_type => 'application/json'
+        payload = JSON.generate({:stack_id => stack_id})
+        http_response = terraform_runner_client.post(
+          "api/stack/retrieve",
+          payload,
+          "Content-Type" => "application/json"
         )
         _log.info("==== Retrieve Stack Response: \n #{http_response.body}")
         Terraform::Runner::Response.parsed_response(http_response)
@@ -178,13 +181,11 @@ module Terraform
 
       # Cancel/Stop running TerraformRunner Stack Job
       def cancel_stack_job(stack_id)
-        payload = JSON.generate(
-          {
-            :stack_id => stack_id
-          }
-        )
-        http_response = terraform_runner_client['api/stack/cancel'].post(
-          payload, :content_type => 'application/json'
+        payload = JSON.generate({:stack_id => stack_id})
+        http_response = terraform_runner_client.post(
+          "api/stack/cancel",
+          payload,
+          "Content-Type" => "application/json"
         )
         _log.info("==== Cancel Stack Response: \n #{http_response.body}")
         Terraform::Runner::Response.parsed_response(http_response)
