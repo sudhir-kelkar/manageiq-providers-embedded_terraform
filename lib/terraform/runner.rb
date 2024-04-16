@@ -133,6 +133,10 @@ module Terraform
         '00000000-0000-0000-0000-000000000000'.freeze
       end
 
+      def json_post_arguments(payload)
+        return JSON.generate(payload), "Content-Type" => "application/json".freeze
+      end
+
       # Create TerraformRunner Stack Job
       def create_stack_job(
         template_path,
@@ -147,20 +151,18 @@ module Terraform
         encoded_zip_file = encoded_zip_from_directory(template_path)
 
         # TODO: use tags,env_vars
-        payload = JSON.generate(
-          {
-            :cloud_providers => credentials,
-            :name            => name,
-            :tenantId        => tenant_id,
-            :templateZipFile => encoded_zip_file,
-            :parameters      => convert_to_cam_parameters(input_vars)
-          }
-        )
+        payload = {
+          :cloud_providers => credentials,
+          :name            => name,
+          :tenantId        => tenant_id,
+          :templateZipFile => encoded_zip_file,
+          :parameters      => convert_to_cam_parameters(input_vars)
+        }
         # _log.debug("Payload:>\n, #{payload}")
+
         http_response = terraform_runner_client.post(
           "api/stack/create",
-          payload,
-          "Content-Type" => "application/json"
+          *json_post_arguments(payload)
         )
         _log.debug("==== http_response.body: \n #{http_response.body}")
         _log.info("stack_job for template: #{template_path} running ...")
@@ -169,11 +171,9 @@ module Terraform
 
       # Retrieve TerraformRunner Stack Job details
       def retrieve_stack_job(stack_id)
-        payload = JSON.generate({:stack_id => stack_id})
         http_response = terraform_runner_client.post(
           "api/stack/retrieve",
-          payload,
-          "Content-Type" => "application/json"
+          *json_post_arguments({:stack_id => stack_id})
         )
         _log.info("==== Retrieve Stack Response: \n #{http_response.body}")
         Terraform::Runner::Response.parsed_response(http_response)
@@ -181,11 +181,9 @@ module Terraform
 
       # Cancel/Stop running TerraformRunner Stack Job
       def cancel_stack_job(stack_id)
-        payload = JSON.generate({:stack_id => stack_id})
         http_response = terraform_runner_client.post(
           "api/stack/cancel",
-          payload,
-          "Content-Type" => "application/json"
+          *json_post_arguments({:stack_id => stack_id})
         )
         _log.info("==== Cancel Stack Response: \n #{http_response.body}")
         Terraform::Runner::Response.parsed_response(http_response)
