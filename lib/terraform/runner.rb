@@ -141,29 +141,25 @@ module Terraform
       )
         _log.info("start stack_job for template: #{template_path}")
         tenant_id = stack_tenant_id
+        encoded_zip_file = encoded_zip_from_directory(template_path)
 
-        Tempfile.create(%w[opentofu-runner-payload .zip]) do |zip_file|
-          create_zip_file_from_directory(zip_file.path, template_path)
-          encoded_zip_file = Base64.encode64(File.binread(zip_file.path))
-
-          # TODO: use tags,env_vars
-          payload = JSON.generate(
-            {
-              :cloud_providers => credentials,
-              :name            => name,
-              :tenantId        => tenant_id,
-              :templateZipFile => encoded_zip_file,
-              :parameters      => convert_to_cam_parameters(input_vars)
-            }
-          )
-          # _log.debug("Payload:>\n, #{payload}")
-          http_response = terraform_runner_client['api/stack/create'].post(
-            payload, :content_type => 'application/json'
-          )
-          _log.debug("==== http_response.body: \n #{http_response.body}")
-          _log.info("stack_job for template: #{template_path} running ...")
-          Terraform::Runner::Response.parsed_response(http_response)
-        end
+        # TODO: use tags,env_vars
+        payload = JSON.generate(
+          {
+            :cloud_providers => credentials,
+            :name            => name,
+            :tenantId        => tenant_id,
+            :templateZipFile => encoded_zip_file,
+            :parameters      => convert_to_cam_parameters(input_vars)
+          }
+        )
+        # _log.debug("Payload:>\n, #{payload}")
+        http_response = terraform_runner_client['api/stack/create'].post(
+          payload, :content_type => 'application/json'
+        )
+        _log.debug("==== http_response.body: \n #{http_response.body}")
+        _log.info("stack_job for template: #{template_path} running ...")
+        Terraform::Runner::Response.parsed_response(http_response)
       end
 
       # Retrieve TerraformRunner Stack Job details
@@ -260,21 +256,22 @@ module Terraform
         wait_until_completes(response.stack_id)
       end
 
-      # create zip from directory
-      def create_zip_file_from_directory(zip_file_path, template_path)
+      # encode zip of a template directory
+      def encoded_zip_from_directory(template_path)
         dir_path = template_path # directory to be zipped
         dir_path = path[0...-1] if dir_path.end_with?('/')
 
-        _log.debug("Create #{zip_file_path}")
-        Zip::File.open(zip_file_path, Zip::File::CREATE) do |zipfile|
-          Dir.chdir(dir_path)
-          Dir.glob("**/*").select { |fn| File.file?(fn) }.each do |file|
-            _log.debug("Adding #{file}")
-            zipfile.add(file.sub("#{dir_path}/", ''), file)
+        Tempfile.create(%w[opentofu-runner-payload .zip]) do |zip_file_path|
+          _log.debug("Create #{zip_file_path}")
+          Zip::File.open(zip_file_path, Zip::File::CREATE) do |zipfile|
+            Dir.chdir(dir_path)
+            Dir.glob("**/*").select { |fn| File.file?(fn) }.each do |file|
+              _log.debug("Adding #{file}")
+              zipfile.add(file.sub("#{dir_path}/", ''), file)
+            end
           end
+          Base64.encode64(File.binread(zip_file_path))
         end
-
-        zip_file_path
       end
     end
   end
