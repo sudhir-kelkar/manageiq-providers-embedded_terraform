@@ -1,5 +1,4 @@
 require 'faraday'
-require 'timeout'
 require 'tempfile'
 require 'zip'
 require 'base64'
@@ -38,6 +37,10 @@ module Terraform
         Terraform::Runner::ResponseAsync.new(response.stack_id)
       end
 
+      # To simplify clients who may just call run, we alias it to call
+      # run_async.  If we ever need run_sync, we'll need to revisit this.
+      alias run run_async
+
       # Stop running terraform-runner job by stack_id
       #
       # @param stack_id [String] stack_id from the terraforn-runner job
@@ -45,27 +48,6 @@ module Terraform
       # @return [Terraform::Runner::Response] Response object with result of terraform run
       def stop_async(stack_id)
         cancel_stack_job(stack_id)
-      end
-
-      # Runs a template, waits until it terraform-runner job completes, via terraform-runner api
-      #
-      # @param input_vars [Hash] Hash with key/value pairs that will be passed as input variables to the
-      #        terraform-runner run
-      # @param template_path [String] Path to the template we will want to run
-      # @param tags [Hash] Hash with key/values pairs that will be passed as tags to the terraform-runner run
-      # @param credentials [Array] List of Authentication object ids to provide to the terraform run
-      # @param env_vars [Hash] Hash with key/value pairs that will be passed as environment variables to the
-      #        terraform-runner run
-      # @return [Terraform::Runner::Response] Response object with final result of terraform run
-      def run(input_vars, template_path, tags: nil, credentials: [], env_vars: {})
-        _log.debug("Run template: #{template_path}")
-        create_stack_job_and_wait_until_completes(
-          template_path,
-          :input_vars  => input_vars,
-          :tags        => tags,
-          :credentials => credentials,
-          :env_vars    => env_vars
-        )
       end
 
       # Fetch terraform-runner job result/status by stack_id
@@ -187,72 +169,6 @@ module Terraform
         )
         _log.info("==== Cancel Stack Response: \n #{http_response.body}")
         Terraform::Runner::Response.parsed_response(http_response)
-      end
-
-      # Wait for TerraformRunner Stack Job to complete
-      def wait_until_completes(stack_id)
-        interval_in_secs = stack_job_interval_in_secs
-        max_time_in_secs = stack_job_max_time_in_secs
-
-        response = nil
-        Timeout.timeout(max_time_in_secs) do
-          _log.debug("Starting wait for terraform-runner/stack/#{stack_id} completes ...")
-          i = 0
-          loop do
-            _log.debug("loop #{i}")
-            i += 1
-
-            response = retrieve_stack_job(stack_id)
-
-            _log.info("status: #{response.status}")
-
-            case response.status
-            when "SUCCESS"
-              _log.debug("Successful! (stack_job/:#{stack_id})")
-              break
-
-            when "FAILED"
-              _log.info("Failed! (stack_job/:#{stack_id} fails!)")
-              _log.info(response.error_message)
-              break
-
-            when nil
-              _log.info("No status! stack_job/:#{stack_id} must have failed, check response ...")
-              _log.info(response.message)
-              break
-            end
-            _log.info("============\n stack_job/:#{stack_id} status=#{response.status} \n============")
-
-            # sleep interval
-            _log.debug("Sleep for #{interval_in_secs} secs")
-            sleep interval_in_secs
-
-            break if i >= 20
-          end
-          _log.debug("loop ends: ran #{i} times")
-        end
-        response
-      end
-
-      # Create TerraformRunner Stack Job, wait until completes
-      def create_stack_job_and_wait_until_completes(
-        template_path,
-        input_vars: [],
-        tags: nil,
-        credentials: [],
-        env_vars: {},
-        name: "stack-#{rand(36**8).to_s(36)}"
-      )
-        _log.info("create_stack_job_and_wait_until_completes for #{template_path}")
-        response = create_stack_job(
-          template_path,
-          :input_vars  => input_vars,
-          :tags        => tags,
-          :credentials => credentials,
-          :env_vars    => env_vars,
-          :name        => name
-        )
-        wait_until_completes(response.stack_id)
       end
 
       # encode zip of a template directory
