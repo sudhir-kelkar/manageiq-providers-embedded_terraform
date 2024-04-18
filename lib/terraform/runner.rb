@@ -119,6 +119,14 @@ module Terraform
         return JSON.generate(payload), "Content-Type" => "application/json".freeze
       end
 
+      def provider_connection_parameters(credentials)
+        credentials.collect do |cred|
+          {
+            'connection_parameters' => Terraform::Runner::Credential.new(cred.id).connection_parameters
+          }
+        end
+      end
+
       # Create TerraformRunner Stack Job
       def create_stack_job(
         template_path,
@@ -134,13 +142,12 @@ module Terraform
 
         # TODO: use tags,env_vars
         payload = {
-          :cloud_providers => credentials,
+          :cloud_providers => provider_connection_parameters(credentials),
           :name            => name,
           :tenantId        => tenant_id,
           :templateZipFile => encoded_zip_file,
           :parameters      => convert_to_cam_parameters(input_vars)
         }
-        # _log.debug("Payload:>\n, #{payload}")
 
         http_response = terraform_runner_client.post(
           "api/stack/create",

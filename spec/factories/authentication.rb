@@ -6,4 +6,8 @@ FactoryBot.define do
   factory :embedded_terraform_scm_credential,
           :parent => :embedded_terraform_credential,
           :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ScmCredential"
+
+  factory :embedded_terraform_vsphere_credential,
+          :parent => :embedded_terraform_credential,
+          :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::VsphereCredential"
 end
