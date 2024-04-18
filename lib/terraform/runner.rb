@@ -9,7 +9,7 @@ module Terraform
       def available?
         return @available if defined?(@available)
 
-        response = terraform_runner_client.get('api/terraformjobs/count')
+        response = terraform_runner_client.get('api/ping')
         @available = response.status == 200
       rescue
         @available = false
