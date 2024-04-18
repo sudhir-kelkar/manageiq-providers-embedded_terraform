@@ -3,6 +3,8 @@ module Terraform
     class ResponseAsync
       include Vmdb::Logging
 
+      attr_reader :stack_id
+
       # Response object designed for holding full response from terraform-runner stack job
       #
       # @param stack_id [String] terraform-runner stack job - stack_id
