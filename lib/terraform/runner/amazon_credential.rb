@@ -44,13 +44,11 @@ module Terraform
           )
         end
 
-        # TODO: check if this region, is correct value for AWS region
-        if auth.region_id
-          region = MiqRegion.find_by(:region => auth.region_id).name
+        if auth.options && auth.options[:region].present?
           conn_params.push(
             {
               'name'    => 'AWS_REGION',
-              'value'   => region,
+              'value'   => auth.options[:region],
               'secured' => 'false',
             }
           )

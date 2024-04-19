@@ -11,20 +11,19 @@ RSpec.describe(Terraform::Runner::AmazonCredential) do
       {
         :userid   => "manageiq-aws",
         :password => "aws_secret",
-        :auth_key => "key_data"
+        :auth_key => "key_data",
+        :options  => {}
       }
     end
 
     let(:cred) { described_class.new(auth.id) }
-
-    let(:region) { MiqRegion.find_by(:region => auth.region_id).name }
 
     # Modeled off of aws provider for terraform:
     #
     #   https://registry.terraform.io/providers/hashicorp/aws/latest/docs#aws-configuration-reference
     #
     describe "#env_vars" do
-      it "sets AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_REGION" do
+      it "sets AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY" do
         auth.update!(:auth_key => nil)
         expected = [
           {
@@ -37,24 +36,13 @@ RSpec.describe(Terraform::Runner::AmazonCredential) do
             'value'   => 'aws_secret',
             'secured' => 'false',
           },
-          {
-            'name'    => 'AWS_REGION',
-            'value'   => region,
-            'secured' => 'false',
-          },
         ]
         expect(cred.connection_parameters).to(eq(expected))
       end
 
       it "not added AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY if blank" do
         auth.update!(:userid => nil, :password => nil, :auth_key => nil)
-        expected = [
-          {
-            'name'    => 'AWS_REGION',
-            'value'   => region,
-            'secured' => 'false',
-          },
-        ]
+        expected = []
         expect(cred.connection_parameters).to(eq(expected))
       end
 
@@ -75,9 +63,32 @@ RSpec.describe(Terraform::Runner::AmazonCredential) do
             'value'   => 'key_data',
             'secured' => 'false',
           },
+        ]
+        expect(cred.connection_parameters).to(eq(expected))
+      end
+
+      it "adds AWS_REGION if present" do
+        auth.update!(:options => auth.options.merge(:region => "aws_region"))
+
+        expected = [
+          {
+            'name'    => 'AWS_ACCESS_KEY_ID',
+            'value'   => 'manageiq-aws',
+            'secured' => 'false',
+          },
+          {
+            'name'    => 'AWS_SECRET_ACCESS_KEY',
+            'value'   => 'aws_secret',
+            'secured' => 'false',
+          },
+          {
+            'name'    => 'AWS_SESSION_TOKEN',
+            'value'   => 'key_data',
+            'secured' => 'false',
+          },
           {
             'name'    => 'AWS_REGION',
-            'value'   => region,
+            'value'   => 'aws_region',
             'secured' => 'false',
           },
         ]

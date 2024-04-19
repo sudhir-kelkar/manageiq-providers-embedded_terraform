@@ -31,6 +31,15 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AmazonCredentia
       :type       => 'password',
       :maxLength  => 1024
     },
+    {
+      :component  => 'text-field',
+      :label      => N_('Region'),
+      :helperText => N_('AWS Region where the provider will operate. The Region must be set.'),
+      :name       => 'region',
+      :id         => 'region',
+      :isRequired => true,
+      :maxLength  => 50,
+    },
   ].freeze
 
   API_ATTRIBUTES = (COMMON_ATTRIBUTES + EXTRA_ATTRIBUTES).freeze
@@ -50,6 +59,8 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AmazonCredentia
   def self.params_to_attributes(params)
     attrs = super.dup
     attrs[:auth_key] = attrs.delete(:security_token) if attrs.key?(:security_token)
+    attrs[:options] ||= {}
+    attrs[:options][:region] = attrs.delete(:region) if attrs.key?(:region)
     attrs
   end
 end

@@ -61,8 +61,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::GoogleCredentia
 
     attrs[:auth_key] = attrs.delete(:ssh_key_data) if attrs.key?(:ssh_key_data)
     attrs[:options]  = {:project => attrs.delete(:project)} if attrs[:project]
-    attrs[:region]   = {:region => attrs.delete(:region)} if attrs[:region]
-
+    attrs[:options][:region] = attrs.delete(:region) if attrs.key?(:region)
     attrs
   end
 
