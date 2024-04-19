@@ -18,4 +18,8 @@ FactoryBot.define do
   factory :embedded_terraform_azure_credential,
           :parent => :embedded_terraform_credential,
           :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AzureCredential"
+
+  factory :embedded_terraform_google_credential,
+          :parent => :embedded_terraform_credential,
+          :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::GoogleCredential"
 end
