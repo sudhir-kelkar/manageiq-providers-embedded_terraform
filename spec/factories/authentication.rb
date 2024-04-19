@@ -10,4 +10,8 @@ FactoryBot.define do
   factory :embedded_terraform_vsphere_credential,
           :parent => :embedded_terraform_credential,
           :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::VsphereCredential"
+
+  factory :embedded_terraform_amazon_credential,
+          :parent => :embedded_terraform_credential,
+          :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AmazonCredential"
 end
