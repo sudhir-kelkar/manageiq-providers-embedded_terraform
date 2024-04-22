@@ -22,7 +22,7 @@ RSpec.describe(Terraform::Runner::AmazonCredential) do
     #
     #   https://registry.terraform.io/providers/hashicorp/aws/latest/docs#aws-configuration-reference
     #
-    describe "#env_vars" do
+    describe "#connection_parameters" do
       it "sets AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY" do
         auth.update!(:auth_key => nil)
         expected = [
@@ -41,7 +41,7 @@ RSpec.describe(Terraform::Runner::AmazonCredential) do
       end
 
       it "not added AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY if blank" do
-        auth.update!(:userid => nil, :password => nil, :auth_key => nil)
+        auth.update!(:userid => '', :password => '', :auth_key => '')
         expected = []
         expect(cred.connection_parameters).to(eq(expected))
       end

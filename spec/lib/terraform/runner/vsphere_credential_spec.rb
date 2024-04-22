@@ -26,7 +26,7 @@ RSpec.describe(Terraform::Runner::VsphereCredential) do
     #   https://registry.terraform.io/providers/hashicorp/vsphere/latest/docs#argument-reference
     #
     #
-    describe "#env_vars" do
+    describe "#connection_parameters" do
       it "sets VSPHERE_USER, VSPHERE_PASSWORD, and VSPHERE_SERVER" do
         expected = [
           {

@@ -14,7 +14,7 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        if auth.host
+        if auth.host.present?
           conn_params.push(
             {
               'name'    => 'OS_AUTH_URL',
@@ -24,7 +24,7 @@ module Terraform
           )
         end
 
-        if auth.userid
+        if auth.userid.present?
           conn_params.push(
             {
               'name'    => 'OS_USERNAME',
@@ -34,7 +34,7 @@ module Terraform
           )
         end
 
-        if auth.password
+        if auth.password.present?
           conn_params.push(
             {
               'name'    => 'OS_PASSWORD',
@@ -44,7 +44,7 @@ module Terraform
           )
         end
 
-        if auth.domain
+        if auth.domain.present?
           conn_params.push(
             {
               'name'    => 'OS_DOMAIN_NAME',
@@ -54,7 +54,7 @@ module Terraform
           )
         end
 
-        if auth.project
+        if auth.project.present?
           conn_params.push(
             {
               'name'    => 'OS_TENANT_NAME', # or OS_PROJECT_NAME

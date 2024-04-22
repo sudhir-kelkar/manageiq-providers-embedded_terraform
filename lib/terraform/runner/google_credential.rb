@@ -20,7 +20,7 @@ module Terraform
           }
         ]
 
-        if auth.project
+        if auth.project.present?
           conn_params.push(
             {
               'name'    => 'GOOGLE_PROJECT',

@@ -14,7 +14,7 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        if auth.userid
+        if auth.userid.present?
           conn_params.push(
             {
               'name'    => 'AWS_ACCESS_KEY_ID',
@@ -24,7 +24,7 @@ module Terraform
           )
         end
 
-        if auth.password
+        if auth.password.present?
           conn_params.push(
             {
               'name'    => 'AWS_SECRET_ACCESS_KEY',
@@ -34,7 +34,7 @@ module Terraform
           )
         end
 
-        if auth.auth_key
+        if auth.auth_key.present?
           conn_params.push(
             {
               'name'    => 'AWS_SESSION_TOKEN',

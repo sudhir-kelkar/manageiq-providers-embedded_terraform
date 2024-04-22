@@ -14,7 +14,7 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        if auth.auth_key
+        if auth.auth_key.present?
           conn_params.push(
             {
               'name'    => 'ARM_CLIENT_SECRET',

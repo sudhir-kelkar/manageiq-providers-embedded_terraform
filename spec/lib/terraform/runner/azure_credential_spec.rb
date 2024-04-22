@@ -25,7 +25,7 @@ RSpec.describe(Terraform::Runner::AzureCredential) do
     #   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#argument-reference
     #
     #
-    describe "#env_vars" do
+    describe "#connection_parameters" do
       context "client_id and tenant_id present" do
         let(:auth_attributes) do
           {
