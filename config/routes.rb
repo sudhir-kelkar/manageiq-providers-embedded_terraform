@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   {
     :embedded_terraform_template   => {
-      :get  => %i[map_credentials download_data download_summary_pdf show show_list tagging_edit],
+      :get  => %i[download_data download_summary_pdf show show_list tagging_edit],
       :post => %i[report_data search_clear button show_list tagging_edit]
     },
     :embedded_terraform_repository => {
