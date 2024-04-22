@@ -59,8 +59,10 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AmazonCredentia
   def self.params_to_attributes(params)
     attrs = super.dup
     attrs[:auth_key] = attrs.delete(:security_token) if attrs.key?(:security_token)
-    attrs[:options] ||= {}
-    attrs[:options][:region] = attrs.delete(:region) if attrs.key?(:region)
+    if %i[region].any? { |opt| attrs.has_key?(opt) }
+      attrs[:options] ||= {}
+      attrs[:options][:region] = attrs.delete(:region) if attrs.key?(:region)
+    end
     attrs
   end
 end
