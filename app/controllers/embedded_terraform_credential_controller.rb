@@ -124,8 +124,6 @@ class EmbeddedTerraformCredentialController < ApplicationController
   def tag_edit_form_field_changed
     assert_privileges('ansible_credential_tag')
 
-    $log.warn(caller.pretty_inspect)
-
     super
   end
 
