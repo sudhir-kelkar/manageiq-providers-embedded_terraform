@@ -14,34 +14,9 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        if auth.auth_key.present?
-          conn_params.push(
-            {
-              'name'    => 'IC_API_KEY',
-              'value'   => auth.auth_key,
-              'secured' => 'false',
-            }
-          )
-        end
-
-        if auth.userid.present?
-          conn_params.push(
-            {
-              'name'    => 'IAAS_CLASSIC_USERNAME',
-              'value'   => auth.userid,
-              'secured' => 'false',
-            }
-          )
-        end
-        if auth.password.present?
-          conn_params.push(
-            {
-              'name'    => 'IAAS_CLASSIC_API_KEY',
-              'value'   => auth.password,
-              'secured' => 'false',
-            }
-          )
-        end
+        ApiParams.add_param_if_present(conn_params, auth.auth_key, 'IC_API_KEY')
+        ApiParams.add_param_if_present(conn_params, auth.userid,   'IAAS_CLASSIC_USERNAME')
+        ApiParams.add_param_if_present(conn_params, auth.password, 'IAAS_CLASSIC_API_KEY')
 
         conn_params
       end

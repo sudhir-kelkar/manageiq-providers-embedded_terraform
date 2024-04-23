@@ -14,102 +14,18 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        if auth.host.present?
-          conn_params.push(
-            {
-              'name'    => 'OS_AUTH_URL',
-              'value'   => auth.host,
-              'secured' => 'false',
-            }
-          )
-        end
-
-        if auth.userid.present?
-          conn_params.push(
-            {
-              'name'    => 'OS_USERNAME',
-              'value'   => auth.userid,
-              'secured' => 'false',
-            }
-          )
-        end
-
-        if auth.password.present?
-          conn_params.push(
-            {
-              'name'    => 'OS_PASSWORD',
-              'value'   => auth.password,
-              'secured' => 'false',
-            }
-          )
-        end
-
-        if auth.domain.present?
-          conn_params.push(
-            {
-              'name'    => 'OS_DOMAIN_NAME',
-              'value'   => auth.domain,
-              'secured' => 'false',
-            }
-          )
-        end
-
-        if auth.project.present?
-          conn_params.push(
-            {
-              'name'    => 'OS_TENANT_NAME', # or OS_PROJECT_NAME
-              'value'   => auth.project,
-              'secured' => 'false',
-            }
-          )
-        end
+        ApiParams.add_param_if_present(conn_params, auth.host,     'OS_AUTH_URL')
+        ApiParams.add_param_if_present(conn_params, auth.userid,   'OS_USERNAME')
+        ApiParams.add_param_if_present(conn_params, auth.password, 'OS_PASSWORD')
+        ApiParams.add_param_if_present(conn_params, auth.domain,   'OS_DOMAIN_NAME')
+        ApiParams.add_param_if_present(conn_params, auth.project,  'OS_TENANT_NAME') # or OS_PROJECT_NAME
 
         if auth.options
-          if auth.options[:region].present?
-            conn_params.push(
-              {
-                'name'    => 'OS_REGION_NAME',
-                'value'   => auth.options[:region],
-                'secured' => 'false',
-              }
-            )
-          end
-          if auth.options[:cacert].present?
-            conn_params.push(
-              {
-                'name'    => 'OS_CACERT',
-                'value'   => auth.options[:cacert],
-                'secured' => 'false',
-              }
-            )
-          end
-          if auth.options[:clientcert].present?
-            conn_params.push(
-              {
-                'name'    => 'OS_CERT',
-                'value'   => auth.options[:clientcert],
-                'secured' => 'false',
-              }
-            )
-          end
-          if auth.options[:clientkey].present?
-            conn_params.push(
-              {
-                'name'    => 'OS_KEY',
-                'value'   => auth.options[:clientkey],
-                'secured' => 'false',
-              }
-            )
-          end
-          if auth.options[:insecure].present?
-            conn_params.push(
-              {
-                'name'    => 'OS_INSECURE',
-                'value'   => auth.options[:insecure],
-                'secured' => 'false',
-              }
-            )
-          end
+          ApiParams.add_param_if_present(conn_params, auth.options[:region],     'OS_REGION_NAME')
+          ApiParams.add_param_if_present(conn_params, auth.options[:cacert],     'OS_CACERT')
+          ApiParams.add_param_if_present(conn_params, auth.options[:clientcert], 'OS_CERT')
+          ApiParams.add_param_if_present(conn_params, auth.options[:clientkey],  'OS_KEY')
+          ApiParams.add_param_if_present(conn_params, auth.options[:insecure],   'OS_INSECURE')
         end
 
         conn_params

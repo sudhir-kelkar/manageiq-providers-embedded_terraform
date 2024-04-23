@@ -80,22 +80,6 @@ module Terraform
         ENV.fetch('TERRAFORM_RUNNER_STACK_JOB_MAX_TIME', 120).to_i
       end
 
-      # Create to paramaters as used by terraform-runner api
-      #
-      # @param vars [Hash] Hash with key/value pairs that will be passed as input variables to the
-      #        terraform-runner run
-      # @return [Array] Array of {:name,:value}
-      def convert_to_cam_parameters(vars)
-        return [] if vars.nil?
-
-        vars.map do |key, value|
-          {
-            :name  => key,
-            :value => value
-          }
-        end
-      end
-
       # create http client for terraform-runner rest-api
       def terraform_runner_client
         @terraform_runner_client ||= begin
@@ -146,7 +130,7 @@ module Terraform
           :name            => name,
           :tenantId        => tenant_id,
           :templateZipFile => encoded_zip_file,
-          :parameters      => convert_to_cam_parameters(input_vars)
+          :parameters      => ApiParams.to_cam_parameters(input_vars)
         }
 
         http_response = terraform_runner_client.post(

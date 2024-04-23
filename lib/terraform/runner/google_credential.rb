@@ -12,32 +12,13 @@ module Terraform
       # Return connection_parameters as required for terraform_runner
       #
       def connection_parameters
-        conn_params = [
-          {
-            'name'    => 'GOOGLE_CREDENTIALS',
-            'value'   => gce_credentials_json,
-            'secured' => 'false',
-          }
-        ]
+        conn_params = []
 
-        if auth.project.present?
-          conn_params.push(
-            {
-              'name'    => 'GOOGLE_PROJECT',
-              'value'   => auth.project,
-              'secured' => 'false',
-            }
-          )
-        end
+        ApiParams.add_param_if_present(conn_params, gce_credentials_json, 'GOOGLE_CREDENTIALS')
+        ApiParams.add_param_if_present(conn_params, auth.project,         'GOOGLE_PROJECT')
 
-        if auth.options && auth.options[:region].present?
-          conn_params.push(
-            {
-              'name'    => 'GOOGLE_REGION',
-              'value'   => auth.options[:region],
-              'secured' => 'false',
-            }
-          )
+        if auth.options
+          ApiParams.add_param_if_present(conn_params, auth.options[:region], 'GOOGLE_REGION')
         end
 
         conn_params

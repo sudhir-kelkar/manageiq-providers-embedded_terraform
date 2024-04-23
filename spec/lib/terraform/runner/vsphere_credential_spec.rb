@@ -48,25 +48,9 @@ RSpec.describe(Terraform::Runner::VsphereCredential) do
         expect(cred.connection_parameters).to(eq(expected))
       end
 
-      it "defaults VSPHERE_USER, VSPHERE_PASSWORD, and VSPHERE_SERVER to '' if missing" do
-        auth.update!(:userid => nil, :password => nil, :options => nil)
-        expected = [
-          {
-            'name'    => 'VSPHERE_USER',
-            'value'   => '',
-            'secured' => 'false',
-          },
-          {
-            'name'    => 'VSPHERE_PASSWORD',
-            'value'   => '',
-            'secured' => 'false',
-          },
-          {
-            'name'    => 'VSPHERE_SERVER',
-            'value'   => '',
-            'secured' => 'false',
-          },
-        ]
+      it "no VSPHERE_USER, VSPHERE_PASSWORD, and VSPHERE_SERVER if blank" do
+        auth.update!(:userid => '', :password => nil, :options => nil)
+        expected = []
         expect(cred.connection_parameters).to(eq(expected))
       end
 
@@ -81,11 +65,6 @@ RSpec.describe(Terraform::Runner::VsphereCredential) do
           {
             'name'    => 'VSPHERE_PASSWORD',
             'value'   => 'vmware_secret',
-            'secured' => 'false',
-          },
-          {
-            'name'    => 'VSPHERE_SERVER',
-            'value'   => '',
             'secured' => 'false',
           },
         ]

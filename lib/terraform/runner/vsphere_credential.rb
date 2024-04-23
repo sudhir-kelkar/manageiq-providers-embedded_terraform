@@ -12,25 +12,16 @@ module Terraform
       # Returns connection_parameters as required by terraform_runner
       #
       def connection_parameters
-        [
-          {
-            'name'    => 'VSPHERE_USER',
-            'value'   => auth.userid || '',
-            'secured' => 'false',
-          },
-          {
-            'name'    => 'VSPHERE_PASSWORD',
-            'value'   => auth.password || '',
-            'secured' => 'false',
-          },
-          {
-            'name'    => 'VSPHERE_SERVER',
-            'value'   => auth.host || '',
-            'secured' => 'false',
-          },
-        ]
-        # 'VSPHERE_ALLOW_UNVERIFIED_SSL' => auth.allow_unverified_ssl || Nil,
-        # 'VSPHERE_VIM_KEEP_ALIVE'       => auth.vim_keep_alive || Nil,
+        conn_params = []
+
+        ApiParams.add_param_if_present(conn_params, auth.userid,   'VSPHERE_USER')
+        ApiParams.add_param_if_present(conn_params, auth.password, 'VSPHERE_PASSWORD')
+        ApiParams.add_param_if_present(conn_params, auth.host,     'VSPHERE_SERVER')
+
+        # 'VSPHERE_ALLOW_UNVERIFIED_SSL' => auth.options[:allow_unverified_ssl] || Nil,
+        # 'VSPHERE_VIM_KEEP_ALIVE'       => auth.options[:vim_keep_alive] || Nil,
+
+        conn_params
       end
     end
   end

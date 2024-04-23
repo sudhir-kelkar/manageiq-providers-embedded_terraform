@@ -16,6 +16,7 @@ module Terraform
         @auth = Authentication.find(authentication_id)
       end
 
+      # Return connection_parameters as required for terraform_runner
       def connection_parameters
         []
       end

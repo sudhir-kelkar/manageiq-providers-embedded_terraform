@@ -29,15 +29,23 @@ RSpec.describe(Terraform::Runner) do
   end
 
   context '.run_async hello-world' do
-    describe '.run_async' do
+    describe '.run_async with input_var' do
       create_stub = nil
       retrieve_stub = nil
+
+      def verify_req(req)
+        body = JSON.parse(req.body)
+        expect(body["name"]).to(start_with('stack-'))
+        expect(body).to(have_key('templateZipFile'))
+        expect(body["parameters"]).to(eq([{"name" => "name", "value" => "New World", "secured" => "false"}]))
+        expect(body["cloud_providers"]).to(eq([]))
+      end
 
       before do
         ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
 
         create_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/create")
-                      .with(:body => hash_including({:parameters => [], :cloud_providers => []}))
+                      .with { |req| verify_req(req) }
                       .to_return(
                         :status => 200,
                         :body   => @hello_world_create_response.to_json
@@ -51,7 +59,7 @@ RSpec.describe(Terraform::Runner) do
                         )
       end
 
-      let(:input_vars) { {} }
+      let(:input_vars) { {'name' => 'New World'} }
 
       it "start running hello-world terraform template" do
         async_response = Terraform::Runner.run_async(input_vars, File.join(__dir__, "runner/data/hello-world"))
@@ -213,8 +221,8 @@ RSpec.describe(Terraform::Runner) do
 
       # .with(:body => hash_including({:parameters => [], :cloud_providers => cloud_providers_conn_params}))
 
-      def verify_req(_req)
-        body = JSON.parse(_req.body)
+      def verify_req(req)
+        body = JSON.parse(req.body)
         expect(body["parameters"]).to(eq([]))
         expect(body["cloud_providers"]).to(eq(cloud_providers_conn_params))
       end
@@ -297,8 +305,8 @@ RSpec.describe(Terraform::Runner) do
         ]
       end
 
-      def verify_req(_req)
-        body = JSON.parse(_req.body)
+      def verify_req(req)
+        body = JSON.parse(req.body)
         expect(body["parameters"]).to(eq([]))
         expect(body["cloud_providers"]).to(eq(cloud_providers_conn_params))
       end

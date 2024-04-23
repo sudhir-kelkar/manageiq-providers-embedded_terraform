@@ -14,44 +14,12 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        if auth.userid.present?
-          conn_params.push(
-            {
-              'name'    => 'AWS_ACCESS_KEY_ID',
-              'value'   => auth.userid,
-              'secured' => 'false',
-            }
-          )
-        end
+        ApiParams.add_param_if_present(conn_params, auth.userid,   'AWS_ACCESS_KEY_ID')
+        ApiParams.add_param_if_present(conn_params, auth.password, 'AWS_SECRET_ACCESS_KEY')
+        ApiParams.add_param_if_present(conn_params, auth.auth_key, 'AWS_SESSION_TOKEN')
 
-        if auth.password.present?
-          conn_params.push(
-            {
-              'name'    => 'AWS_SECRET_ACCESS_KEY',
-              'value'   => auth.password,
-              'secured' => 'false',
-            }
-          )
-        end
-
-        if auth.auth_key.present?
-          conn_params.push(
-            {
-              'name'    => 'AWS_SESSION_TOKEN',
-              'value'   => auth.auth_key,
-              'secured' => 'false',
-            }
-          )
-        end
-
-        if auth.options && auth.options[:region].present?
-          conn_params.push(
-            {
-              'name'    => 'AWS_REGION',
-              'value'   => auth.options[:region],
-              'secured' => 'false',
-            }
-          )
+        if auth.options
+          ApiParams.add_param_if_present(conn_params, auth.options[:region], 'AWS_REGION')
         end
 
         conn_params

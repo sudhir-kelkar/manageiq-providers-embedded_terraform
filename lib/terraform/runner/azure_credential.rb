@@ -14,46 +14,14 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        if auth.auth_key.present?
-          conn_params.push(
-            {
-              'name'    => 'ARM_CLIENT_SECRET',
-              'value'   => auth.auth_key,
-              'secured' => 'false',
-            }
-          )
-        end
+        ApiParams.add_param_if_present(conn_params, auth.auth_key, 'ARM_CLIENT_SECRET')
 
-        # TODO: check if we can add more authentication options
+        # TODO: check if we can add more authentication options available in Azure.
 
         if auth.options
-          if auth.options[:client].present?
-            conn_params.push(
-              {
-                'name'    => 'ARM_CLIENT_ID',
-                'value'   => auth.options[:client],
-                'secured' => 'false',
-              }
-            )
-          end
-          if auth.options[:tenant].present?
-            conn_params.push(
-              {
-                'name'    => 'ARM_TENANT_ID',
-                'value'   => auth.options[:tenant],
-                'secured' => 'false',
-              }
-            )
-          end
-          if auth.options[:subscription].present?
-            conn_params.push(
-              {
-                'name'    => 'ARM_SUBSCRIPTION_ID',
-                'value'   => auth.options[:subscription],
-                'secured' => 'false',
-              }
-            )
-          end
+          ApiParams.add_param_if_present(conn_params, auth.options[:client],       'ARM_CLIENT_ID')
+          ApiParams.add_param_if_present(conn_params, auth.options[:tenant],       'ARM_TENANT_ID')
+          ApiParams.add_param_if_present(conn_params, auth.options[:subscription], 'ARM_SUBSCRIPTION_ID')
         end
 
         conn_params
