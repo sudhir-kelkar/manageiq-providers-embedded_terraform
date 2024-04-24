@@ -15,8 +15,8 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AzureCredential
       :component  => 'text-field',
       :label      => N_('Tenant ID'),
       :helperText => N_('The Tenant ID for the Microsoft Azure account'),
-      :name       => 'tenant',
-      :id         => 'tenant',
+      :name       => 'provider_tenant',
+      :id         => 'provider_tenant',
       :maxLength  => 1024,
     },
     {
@@ -56,11 +56,11 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AzureCredential
     attrs            = super.dup
     attrs[:auth_key] = attrs.delete(:secret) if attrs.key?(:secret)
 
-    if %i[client tenant subscription].any? { |opt| attrs.has_key?(opt) }
-      attrs[:options]              ||= {}
-      attrs[:options][:client]       = attrs.delete(:client)       if attrs.key?(:client)
-      attrs[:options][:tenant]       = attrs.delete(:tenant)       if attrs.key?(:tenant)
-      attrs[:options][:subscription] = attrs.delete(:subscription) if attrs.key?(:subscription)
+    if %i[client provider_tenant subscription].any? { |opt| attrs.key?(opt) }
+      attrs[:options] ||= {}
+      attrs[:options][:client]          = attrs.delete(:client)          if attrs.key?(:client)
+      attrs[:options][:provider_tenant] = attrs.delete(:provider_tenant) if attrs.key?(:provider_tenant)
+      attrs[:options][:subscription]    = attrs.delete(:subscription)    if attrs.key?(:subscription)
     end
 
     attrs
@@ -70,8 +70,8 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AzureCredential
     options && options[:client]
   end
 
-  def tenant
-    options && options[:tenant]
+  def provider_tenant
+    options && options[:provider_tenant]
   end
 
   def subscription

@@ -11,9 +11,9 @@ RSpec.describe(Terraform::Runner::AzureCredential) do
       {
         :auth_key => "client_secret",
         :options  => {
-          :client       => "client_id",
-          :tenant       => "tenant_id",
-          :subscription => "subscription_id"
+          :client          => "client_id",
+          :provider_tenant => "tenant_id",
+          :subscription    => "subscription_id"
         }
       }
     end
@@ -31,8 +31,8 @@ RSpec.describe(Terraform::Runner::AzureCredential) do
           {
             :auth_key => "client_secret",
             :options  => {
-              :client => "client_id",
-              :tenant => "tenant_id"
+              :client          => "client_id",
+              :provider_tenant => "tenant_id"
             }
           }
         end

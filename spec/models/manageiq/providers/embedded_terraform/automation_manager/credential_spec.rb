@@ -285,20 +285,20 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
 
       let(:params) do
         {
-          :name         => "Azure Credential",
-          :secret       => "secret2",
-          :client       => "client",
-          :tenant       => "tenant",
-          :subscription => "subscription"
+          :name            => "Azure Credential",
+          :secret          => "secret2",
+          :client          => "client",
+          :provider_tenant => "tenant",
+          :subscription    => "subscription"
         }
       end
       let(:queue_create_params) do
         {
-          :name         => "Azure Credential",
-          :secret       => ManageIQ::Password.encrypt("secret2"),
-          :client       => "client",
-          :tenant       => "tenant",
-          :subscription => "subscription"
+          :name            => "Azure Credential",
+          :secret          => ManageIQ::Password.encrypt("secret2"),
+          :client          => "client",
+          :provider_tenant => "tenant",
+          :subscription    => "subscription"
         }
       end
       let(:params_to_attributes) do
@@ -306,9 +306,9 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
           :name     => "Azure Credential",
           :auth_key => "secret2",
           :options  => {
-            :client       => "client",
-            :tenant       => "tenant",
-            :subscription => "subscription"
+            :client          => "client",
+            :provider_tenant => "tenant",
+            :subscription    => "subscription"
           }
         }
       end
@@ -317,17 +317,17 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
           :name               => "Azure Credential",
           :secret             => "secret2",
           :client             => "client",
-          :tenant             => "tenant",
+          :provider_tenant    => "tenant",
           :subscription       => "subscription",
           :auth_key_encrypted => ManageIQ::Password.try_encrypt("secret2"),
           :options            => {
-            :client       => "client",
-            :tenant       => "tenant",
-            :subscription => "subscription"
+            :client          => "client",
+            :provider_tenant => "tenant",
+            :subscription    => "subscription"
           }
         }
       end
-      let(:params_to_attrs) { [:auth_key, :client, :tenant, :subscription] }
+      let(:params_to_attrs) { [:auth_key, :client, :provider_tenant, :subscription] }
       let(:update_params) do
         {
           :name   => "Updated Credential",
@@ -345,7 +345,7 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
         terraform_cred = credential_class.raw_create_in_provider(manager, params)
         expect(Notification).to(receive(:create!).never)
         expect(terraform_cred.client).to(eq("client"))
-        expect(terraform_cred.tenant).to(eq("tenant"))
+        expect(terraform_cred.provider_tenant).to(eq("tenant"))
         expect(terraform_cred.subscription).to(eq("subscription"))
 
         result = terraform_cred.update_in_provider(:name => "Updated Credential", :client => "foo")
@@ -353,7 +353,7 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
         expect(result).to(be_a(credential_class))
         expect(result.name).to(eq("Updated Credential"))
         expect(result.client).to(eq("foo"))
-        expect(result.tenant).to(eq("tenant"))
+        expect(result.provider_tenant).to(eq("tenant"))
         expect(result.subscription).to(eq("subscription"))
       end
     end

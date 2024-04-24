@@ -19,9 +19,9 @@ module Terraform
         # TODO: check if we can add more authentication options available in Azure.
 
         if auth.options
-          ApiParams.add_param_if_present(conn_params, auth.options[:client],       'ARM_CLIENT_ID')
-          ApiParams.add_param_if_present(conn_params, auth.options[:tenant],       'ARM_TENANT_ID')
-          ApiParams.add_param_if_present(conn_params, auth.options[:subscription], 'ARM_SUBSCRIPTION_ID')
+          ApiParams.add_param_if_present(conn_params, auth.options[:client],          'ARM_CLIENT_ID')
+          ApiParams.add_param_if_present(conn_params, auth.options[:provider_tenant], 'ARM_TENANT_ID')
+          ApiParams.add_param_if_present(conn_params, auth.options[:subscription],    'ARM_SUBSCRIPTION_ID')
         end
 
         conn_params
