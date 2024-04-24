@@ -29,5 +29,5 @@ FactoryBot.define do
 
   factory :embedded_terraform_ibmcloud_credential,
           :parent => :embedded_terraform_credential,
-          :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmcloudCredential"
+          :class  => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmCloudCredential"
 end

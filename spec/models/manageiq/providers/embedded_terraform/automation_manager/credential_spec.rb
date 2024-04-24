@@ -533,9 +533,9 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
     end
   end
 
-  context "IbmcloudCredential" do
+  context "IbmCloudCredential" do
     it_behaves_like 'an embedded_terraform credential' do
-      let(:credential_class) { embedded_terraform::IbmcloudCredential }
+      let(:credential_class) { embedded_terraform::IbmCloudCredential }
 
       let(:params) do
         {

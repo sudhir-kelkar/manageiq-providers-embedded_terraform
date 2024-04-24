@@ -1,8 +1,8 @@
 require 'terraform/runner'
 
-RSpec.describe(Terraform::Runner::IbmcloudCredential) do
+RSpec.describe(Terraform::Runner::IbmCloudCredential) do
   it ".auth_type is the correct Authentication sub-class" do
-    expect(described_class.auth_type).to(eq("ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmcloudCredential"))
+    expect(described_class.auth_type).to(eq("ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmCloudCredential"))
   end
 
   context "with a credential object" do

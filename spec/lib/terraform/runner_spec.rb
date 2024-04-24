@@ -268,7 +268,7 @@ RSpec.describe(Terraform::Runner) do
         params = {
           :auth_key => "ibmcloud-api-key",
         }
-        credential_class = embedded_terraform::IbmcloudCredential
+        credential_class = embedded_terraform::IbmCloudCredential
         credential_class.create_in_provider(manager.id, params)
       end
 

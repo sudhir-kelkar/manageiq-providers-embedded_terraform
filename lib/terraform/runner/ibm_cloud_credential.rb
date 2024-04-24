@@ -1,8 +1,8 @@
 module Terraform
   class Runner
-    class IbmcloudCredential < Credential
+    class IbmCloudCredential < Credential
       def self.auth_type
-        "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmcloudCredential"
+        "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmCloudCredential"
       end
 
       # Modeled off of IBM Cloud provider for terraform:
