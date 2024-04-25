@@ -34,6 +34,8 @@ class EmbeddedTerraformRepositoryController < ApplicationController
 
   def button
     case params[:pressed]
+    when 'embedded_configuration_script_source_refresh'
+      repository_refresh
     when "embedded_configuration_script_source_edit"
       id = params[:miq_grid_checks]
       javascript_redirect(:action => 'edit', :id => id)
