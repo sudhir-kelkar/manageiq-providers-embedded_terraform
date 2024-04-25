@@ -3,7 +3,7 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
   let(:manager) { FactoryBot.create(:embedded_automation_manager_terraform) }
 
   before do
-    EvmSpecHelper.assign_role("embedded_terraform")
+    EmbeddedTerraformEvmSpecHelper.assign_embedded_terraform_role
   end
 
   context "#native_ref" do

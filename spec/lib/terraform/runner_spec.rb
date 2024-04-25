@@ -12,7 +12,7 @@ RSpec.describe(Terraform::Runner) do
   end
 
   before do
-    EvmSpecHelper.assign_role("embedded_terraform")
+    EmbeddedTerraformEvmSpecHelper.assign_embedded_terraform_role
   end
 
   describe "is .available" do
