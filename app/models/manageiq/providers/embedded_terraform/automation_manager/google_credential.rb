@@ -34,7 +34,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::GoogleCredentia
     },
     {
       :component  => 'text-field',
-      :label      => N_('Region'),
+      :label      => N_('Google Cloud Region'),
       :helperText => N_('The default region for the resources. If another region is specified on the resource, it will take precedence.'),
       :name       => 'region',
       :id         => 'region',
