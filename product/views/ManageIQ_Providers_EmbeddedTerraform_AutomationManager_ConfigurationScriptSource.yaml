@@ -22,6 +22,8 @@ cols:
 - name
 - description
 - total_payloads
+- scm_url
+- scm_branch
 - created_at
 - updated_at
 - status
@@ -35,6 +37,8 @@ col_order:
 - name
 - description
 - total_payloads
+- scm_url
+- scm_branch
 - created_at
 - updated_at
 - status
@@ -44,6 +48,8 @@ headers:
 - Name
 - Description
 - Templates
+- Repository URL
+- Repository Branch
 - Created On
 - Last refresh on
 - Status

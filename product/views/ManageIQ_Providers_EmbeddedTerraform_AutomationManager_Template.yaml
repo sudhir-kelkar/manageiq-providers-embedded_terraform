@@ -23,6 +23,7 @@ cols:
 - name
 - description
 - repository
+- configuration_script_source.scm_branch
 - created_at
 - updated_at
 
@@ -31,12 +32,14 @@ include:
   configuration_script_source:
     columns:
     - name
+    - scm_branch
 
 # Order of columns (from all tables)
 col_order:
 - name
 - description
 - configuration_script_source.name
+- configuration_script_source.scm_branch
 - created_at
 - updated_at
 
@@ -45,6 +48,7 @@ headers:
 - Name
 - Description
 - Repository
+- Repository Branch
 - Created On
 - Updated On
 
