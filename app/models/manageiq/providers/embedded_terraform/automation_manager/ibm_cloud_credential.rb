@@ -48,7 +48,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmCloudCredent
 
     attrs[:auth_key] = attrs.delete(:auth_key) if attrs.key?(:auth_key)
 
-    if %i[classic_user classic_key].any? { |opt| attrs.has_key?(opt) }
+    if %i[classic_user classic_key].any? { |opt| attrs.key?(opt) }
       attrs[:userid]   = attrs.delete(:classic_user) if attrs.key?(:classic_user)
       attrs[:password] = attrs.delete(:classic_key)  if attrs.key?(:classic_key)
     end
