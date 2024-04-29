@@ -3,6 +3,14 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
     '/Service/Generic/StateMachines/GenericLifecycle/provision'
   end
 
+  def self.default_reconfiguration_entry_point
+    nil
+  end
+
+  def self.default_retirement_entry_point
+    '/Service/Generic/StateMachines/GenericLifecycle/Retire_Basic_Resource'
+  end
+
   def self.create_catalog_item(options, _auth_user)
     options      = options.merge(:service_type => SERVICE_TYPE_ATOMIC, :prov_type => 'generic_terraform_template')
     config_info  = validate_config_info(options[:config_info])
@@ -15,19 +23,13 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
   end
 
   def self.validate_config_info(info)
-    return info
-
     info[:provision][:fqname]   ||= default_provisioning_entry_point(SERVICE_TYPE_ATOMIC) if info.key?(:provision)
     info[:reconfigure][:fqname] ||= default_reconfiguration_entry_point if info.key?(:reconfigure)
 
-    if info.key?(:retirement)
-      info[:retirement][:fqname] ||= RETIREMENT_ENTRY_POINTS[info[:retirement][:remove_resources]]
-      info[:retirement][:fqname] ||= default_retirement_entry_point
-    else
-      info[:retirement] = {:fqname => default_retirement_entry_point}
-    end
+    info[:retirement] ||= {}
+    info[:retirement][:fqname] ||= default_retirement_entry_point
 
-    # TODO: Add more validation for required fields
+    raise _("Must provide a configuration_script_payload_id") if info[:provision][:configuration_script_payload_id].nil?
 
     info
   end
@@ -35,6 +37,8 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
   def terraform_template(action)
     template_id = config_info.dig(action.downcase.to_sym, :configuration_script_payload_id)
+    return if template_id.nil?
+
     ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Template.find(template_id)
   end
 end
