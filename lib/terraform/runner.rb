@@ -80,22 +80,6 @@ module Terraform
         ENV.fetch('TERRAFORM_RUNNER_STACK_JOB_MAX_TIME', 120).to_i
       end
 
-      # Create to paramaters as used by terraform-runner api
-      #
-      # @param vars [Hash] Hash with key/value pairs that will be passed as input variables to the
-      #        terraform-runner run
-      # @return [Array] Array of {:name,:value}
-      def convert_to_cam_parameters(vars)
-        return [] if vars.nil?
-
-        vars.map do |key, value|
-          {
-            :name  => key,
-            :value => value
-          }
-        end
-      end
-
       # create http client for terraform-runner rest-api
       def terraform_runner_client
         @terraform_runner_client ||= begin
@@ -119,6 +103,14 @@ module Terraform
         return JSON.generate(payload), "Content-Type" => "application/json".freeze
       end
 
+      def provider_connection_parameters(credentials)
+        credentials.collect do |cred|
+          {
+            'connection_parameters' => Terraform::Runner::Credential.new(cred.id).connection_parameters
+          }
+        end
+      end
+
       # Create TerraformRunner Stack Job
       def create_stack_job(
         template_path,
@@ -134,13 +126,12 @@ module Terraform
 
         # TODO: use tags,env_vars
         payload = {
-          :cloud_providers => credentials,
+          :cloud_providers => provider_connection_parameters(credentials),
           :name            => name,
           :tenantId        => tenant_id,
           :templateZipFile => encoded_zip_file,
-          :parameters      => convert_to_cam_parameters(input_vars)
+          :parameters      => ApiParams.to_cam_parameters(input_vars)
         }
-        # _log.debug("Payload:>\n, #{payload}")
 
         http_response = terraform_runner_client.post(
           "api/stack/create",

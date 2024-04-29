@@ -1,4 +1,4 @@
-RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource do
+RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource) do
   context "with a local repo" do
     let(:manager) { FactoryBot.create(:embedded_automation_manager_terraform) }
 
@@ -23,7 +23,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
       repo.git_branch_create("other_branch")
       stub_const("GitRepository::GIT_REPO_DIRECTORY", repo_dir)
 
-      EvmSpecHelper.assign_role("embedded_terraform")
+      EmbeddedTerraformEvmSpecHelper.assign_embedded_terraform_role
     end
 
     # Clean up repo dir after each spec
@@ -42,17 +42,17 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
         it "creates a record and initializes a git repo" do
           result = described_class.create_in_provider(manager.id, params)
 
-          expect(result).to be_a(described_class)
-          expect(result).to have_attributes(
-            :scm_type          => "git",
-            :scm_branch        => "master",
-            :status            => "successful",
-            :last_update_error => nil
-          )
-          expect(result.last_updated_on).to be_within(2.seconds).of(Time.now.utc)
+          expect(result).to(be_a(described_class))
+          expect(result).to(have_attributes(
+                              :scm_type          => "git",
+                              :scm_branch        => "master",
+                              :status            => "successful",
+                              :last_update_error => nil
+                            ))
+          expect(result.last_updated_on).to(be_within(2.seconds).of(Time.now.utc))
 
           git_repo_dir = repo_dir.join(result.git_repository.id.to_s)
-          expect(files_in_repository(git_repo_dir)).to eq ["hello_world.tf"]
+          expect(files_in_repository(git_repo_dir)).to(eq(["hello_world.tf"]))
         end
       end
     end
@@ -61,15 +61,15 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
       it "creates a task and queue item" do
         EvmSpecHelper.local_miq_server
         task_id = described_class.create_in_provider_queue(manager.id, params)
-        expect(MiqTask.find(task_id)).to have_attributes(:name => "Creating #{described_class::FRIENDLY_NAME} (name=#{params[:name]})")
-        expect(MiqQueue.first).to have_attributes(
-          :args        => [manager.id, params],
-          :class_name  => described_class.name,
-          :method_name => "create_in_provider",
-          :priority    => MiqQueue::HIGH_PRIORITY,
-          :role        => "embedded_terraform",
-          :zone        => nil
-        )
+        expect(MiqTask.find(task_id)).to(have_attributes(:name => "Creating #{described_class::FRIENDLY_NAME} (name=#{params[:name]})"))
+        expect(MiqQueue.first).to(have_attributes(
+                                    :args        => [manager.id, params],
+                                    :class_name  => described_class.name,
+                                    :method_name => "create_in_provider",
+                                    :priority    => MiqQueue::HIGH_PRIORITY,
+                                    :role        => "embedded_terraform",
+                                    :zone        => nil
+                                  ))
       end
     end
 
@@ -91,7 +91,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
           "output_vars"   => nil
         }
 
-        expect(payloads.first).to eq(expected_hash.to_json)
+        expect(payloads.first).to(eq(expected_hash.to_json))
       end
 
       context "with a nested templates dir" do
@@ -123,7 +123,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
             "output_vars"   => nil
           }
 
-          expect(payloads.first).to eq(expected_hash.to_json)
+          expect(payloads.first).to(eq(expected_hash.to_json))
         end
 
         it "deletes existing records" do
@@ -138,8 +138,8 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
 
           # verify the original payload is removed
           new_ids = record.configuration_script_payloads.pluck(:id)
-          expect(new_ids).to be_present
-          expect(new_ids).to_not include(existing_id)
+          expect(new_ids).to(be_present)
+          expect(new_ids).to_not(include(existing_id))
         end
       end
 
@@ -187,7 +187,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
             "output_vars"   => nil
           }
 
-          expect(payloads).to match_array([expected_hash1.to_json, expected_hash2.to_json])
+          expect(payloads).to(match_array([expected_hash1.to_json, expected_hash2.to_json]))
         end
       end
 
@@ -217,7 +217,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
 
           files = JSON.parse(payloads.first)["files"]
 
-          expect(files).to match_array(%w[main.tf outputs.tf variables.tf])
+          expect(files).to(match_array(%w[main.tf outputs.tf variables.tf]))
         end
       end
 
@@ -241,7 +241,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
           record           = build_record
 
           names = record.configuration_script_payloads.pluck(:name)
-          expect(names).to match_array(["hello-world(master):#{nested_repo}/templates"])
+          expect(names).to(match_array(["hello-world(master):#{nested_repo}/templates"]))
         end
       end
     end
@@ -252,11 +252,11 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
       let(:expected_result)       { "hello-world(v2.0):example.com/manoj-puthran/sample-scripts/terraform/templates" }
 
       it "supports https urls" do
-        expect(described_class.template_name_from_git_repo_url(*https_url_branch_path)).to eq(expected_result)
+        expect(described_class.template_name_from_git_repo_url(*https_url_branch_path)).to(eq(expected_result))
       end
 
       it "converts git urls" do
-        expect(described_class.template_name_from_git_repo_url(*git_url_branch_path)).to eq(expected_result)
+        expect(described_class.template_name_from_git_repo_url(*git_url_branch_path)).to(eq(expected_result))
       end
     end
 
@@ -266,13 +266,13 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
       context "with valid params" do
         it "updates the record and initializes a git repo" do
           record = build_record
-          result = record.update_in_provider update_params
+          result = record.update_in_provider(update_params)
 
-          expect(result).to be_a(described_class)
-          expect(result.scm_branch).to eq("other_branch")
+          expect(result).to(be_a(described_class))
+          expect(result.scm_branch).to(eq("other_branch"))
 
           git_repo_dir = repo_dir.join(result.git_repository.id.to_s)
-          expect(files_in_repository(git_repo_dir)).to eq ["hello_world.tf"]
+          expect(files_in_repository(git_repo_dir)).to(eq(["hello_world.tf"]))
 
           names_and_payloads = record.configuration_script_payloads.pluck(:name, :payload)
 
@@ -288,38 +288,38 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
             "output_vars"   => nil
           }
 
-          expect(payloads.first).to eq(expected_hash.to_json)
+          expect(payloads.first).to(eq(expected_hash.to_json))
         end
       end
 
       context "when there is a network error fetching the repo" do
         before do
           record = build_record
-          expect(record.git_repository).to receive(:update_repo).and_raise(Rugged::NetworkError)
+          expect(record.git_repository).to(receive(:update_repo).and_raise(Rugged::NetworkError))
 
-          expect { record.update_in_provider update_params }.to raise_error(Rugged::NetworkError)
+          expect { record.update_in_provider(update_params) }.to(raise_error(Rugged::NetworkError))
         end
 
         it "sets the status to 'error' if syncing has a network error" do
           result = described_class.last
 
-          expect(result).to be_a(described_class)
-          expect(result).to have_attributes(
-            :scm_type   => "git",
-            :scm_branch => "other_branch",
-            :status     => "error"
-          )
-          expect(result.last_updated_on).to be_within(2.seconds).of(Time.now.utc)
-          expect(result.last_update_error).to start_with("Rugged::NetworkError")
+          expect(result).to(be_a(described_class))
+          expect(result).to(have_attributes(
+                              :scm_type   => "git",
+                              :scm_branch => "other_branch",
+                              :status     => "error"
+                            ))
+          expect(result.last_updated_on).to(be_within(2.seconds).of(Time.now.utc))
+          expect(result.last_update_error).to(start_with("Rugged::NetworkError"))
         end
 
         it "clears last_update_error on re-sync" do
           result = described_class.last
 
-          expect(result.status).to eq("error")
-          expect(result.last_updated_on).to be_within(2.seconds).of(Time.now.utc)
-          expect(result.last_update_error).to start_with("Rugged::NetworkError")
-          expect(result.git_repository).to receive(:update_repo).and_call_original
+          expect(result.status).to(eq("error"))
+          expect(result.last_updated_on).to(be_within(2.seconds).of(Time.now.utc))
+          expect(result.last_update_error).to(start_with("Rugged::NetworkError"))
+          expect(result.git_repository).to(receive(:update_repo).and_call_original)
 
           result.sync
 
@@ -372,7 +372,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
     end
 
     def build_record
-      described_class.create_in_provider manager.id, params
+      described_class.create_in_provider(manager.id, params)
     end
   end
 end
