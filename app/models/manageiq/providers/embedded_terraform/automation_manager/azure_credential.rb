@@ -1,4 +1,4 @@
-class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AzureCredential < ManageIQ::Providers::EmbeddedTerraform::AutomationManager::CloudCredential
+class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AzureCredential < ManageIQ::Providers::EmbeddedTerraform::AutomationManager::TemplateCredential
   COMMON_ATTRIBUTES = [].freeze
 
   EXTRA_ATTRIBUTES = [
