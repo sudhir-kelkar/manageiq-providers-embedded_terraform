@@ -25,8 +25,23 @@ class ServiceTerraformTemplate < ServiceGeneric
     raise task.message unless task.status_ok?
   end
 
+  def check_completed(action)
+    status  = stack(action).raw_status
+    done    = status.completed?
+    message = nil
+    [done, message]
+  rescue MiqException::MiqOrchestrationStackNotExistError, MiqException::MiqOrchestrationStatusError => err
+    [true, err.message] # consider done with an error when exception is caught
+  end
+
   def launch_terraform_template(action)
-    job = terraform_template(action).run(options)
-    add_resource!(job, :name => action)
+    terraform_template = terraform_template(action)
+
+    stack = ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack.create_stack(terraform_template, options)
+    add_resource!(stack, :name => action)
+  end
+
+  def stack(action)
+    service_resources.find_by(:name => action, :resource_type => 'OrchestrationStack').try(:resource)
   end
 end

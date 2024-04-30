@@ -41,4 +41,8 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack < ManageI
       manager.credentials.where(:id => credential_ids)
     end
   end
+
+  def raw_status
+    Status.new(miq_task, nil)
+  end
 end
