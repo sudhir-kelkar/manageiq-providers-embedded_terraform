@@ -45,7 +45,11 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
   def post_execute
     cleanup_git_repository
 
-    success? ? queue_signal(:finish, message, status) : abort_job("Failed to run template", "error")
+    return queue_signal(:finish, message, status) if success?
+
+    _log.error("Failed to run template: [#{error_message}]")
+
+    abort_job("Failed to run template", "error")
   end
 
   alias initializing dispatch_start
@@ -62,6 +66,10 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
 
   def success?
     stack_response&.response&.status == "SUCCESS"
+  end
+
+  def error_message
+    stack_response&.response&.error_message
   end
 
   def load_transitions
@@ -125,5 +133,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
 
     _log.info("Cleaning up git repository checkout at #{options[:git_checkout_tempdir].inspect}...")
     FileUtils.rm_rf(options[:git_checkout_tempdir])
+  rescue Errno::ENOENT
+    nil
   end
 end
