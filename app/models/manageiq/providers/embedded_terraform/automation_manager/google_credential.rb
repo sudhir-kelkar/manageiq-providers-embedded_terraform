@@ -1,4 +1,4 @@
-class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::GoogleCredential < ManageIQ::Providers::EmbeddedTerraform::AutomationManager::CloudCredential
+class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::GoogleCredential < ManageIQ::Providers::EmbeddedTerraform::AutomationManager::TemplateCredential
   COMMON_ATTRIBUTES = [
     {
       :component  => 'text-field',

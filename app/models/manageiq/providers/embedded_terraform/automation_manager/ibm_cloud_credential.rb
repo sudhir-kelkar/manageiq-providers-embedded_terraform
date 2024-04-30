@@ -1,4 +1,4 @@
-class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmCloudCredential < ManageIQ::Providers::EmbeddedTerraform::AutomationManager::CloudCredential
+class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmCloudCredential < ManageIQ::Providers::EmbeddedTerraform::AutomationManager::TemplateCredential
   COMMON_ATTRIBUTES = [
     {
       :component  => 'password-field',
