@@ -34,7 +34,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::AmazonCredentia
     {
       :component  => 'text-field',
       :label      => N_('AWS Region'),
-      :helperText => N_('AWS Region where the provider will operate. The Region must be set.'),
+      :helperText => N_('AWS Region where the provider will operate.'),
       :name       => 'region',
       :id         => 'region',
       :isRequired => true,
