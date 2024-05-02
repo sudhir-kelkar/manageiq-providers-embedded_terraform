@@ -1,0 +1,63 @@
+class OpentofuWorker < MiqWorker
+  self.required_roles        = ["embedded_terraform"]
+  self.rails_worker          = false
+  self.maximum_workers_count = 1
+
+  def self.service_base_name
+    "opentofu-runner"
+  end
+
+  def self.service_file
+    "#{service_base_name}.service"
+  end
+
+  def self.worker_deployment_name
+    "opentofu-runner"
+  end
+
+  def self.kill_priority
+    MiqWorkerType::KILL_PRIORITY_GENERIC_WORKERS
+  end
+
+  private
+
+  # There can only be a single instance running so the unit name can just be
+  # "opentofu-runner.service"
+  def unit_instance
+    ""
+  end
+
+  def container_image_name
+    "opentofu-runner"
+  end
+
+  def container_image
+    ENV["OPENTOFU_RUNNER_IMAGE"] || default_image
+  end
+
+  def enable_systemd_unit
+    super
+    create_podman_secret
+  end
+
+  def unit_environment_variables
+    {
+      "DATABASE_HOSTNAME" => database_configuration[:host],
+      "DATABASE_NAME"     => database_configuration[:database],
+      "DATABASE_USERNAME" => database_configuration[:username],
+      "MEMCACHED_SERVER"  => ::Settings.session.memcache_server
+    }
+  end
+
+  def create_podman_secret
+    return if AwesomeSpawn.run("runuser", :params => [[:login, "manageiq"], [:command, "podman secret exists --root=#{Rails.root.join("data/containers/storage")} opentofu-runner-secret"]]).success?
+
+    secret = {"DATABASE_PASSWORD" => database_configuration[:password]}
+
+    AwesomeSpawn.run!("runuser", :params => [[:login, "manageiq"], [:command, "podman secret create --root=#{Rails.root.join("data/containers/storage")} opentofu-runner-secret -"]], :in_data => secret.to_json)
+  end
+
+  def database_configuration
+    ActiveRecord::Base.connection_db_config.configuration_hash
+  end
+end
