@@ -42,9 +42,9 @@ class EmbeddedTerraformCredentialController < ApplicationController
       javascript_redirect(:action => 'edit', :id => params[:miq_grid_checks])
     when 'embedded_configuration_script_source_edit' # edit repository from nested list
       javascript_redirect(:controller => 'embedded_terraform_repository', :action => 'edit', :id => params[:miq_grid_checks])
-    when 'ansible_credential_tag'
+    when 'embedded_automation_manager_credential_tag'
       tag(self.class.model)
-    when "ansible_repository_tag" # repositories from nested list
+    when "embedded_configuration_script_source_tag" # repositories from nested list
       tag(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource)
     end
   end
@@ -122,7 +122,7 @@ class EmbeddedTerraformCredentialController < ApplicationController
   end
 
   def tag_edit_form_field_changed
-    assert_privileges('ansible_credential_tag')
+    assert_privileges('embedded_automation_manager_credential_tag')
 
     super
   end
