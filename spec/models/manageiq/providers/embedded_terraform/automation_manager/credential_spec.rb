@@ -584,28 +584,28 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
 
       let(:params) do
         {
-          :name     => "IBM Classic Infrastructure Credential",
+          :name     => "IBM Cloud Classic Infrastructure Credential",
           :userid   => "user1",
           :password => "secret2",
         }
       end
       let(:queue_create_params) do
         {
-          :name     => "IBM Classic Infrastructure Credential",
+          :name     => "IBM Cloud Classic Infrastructure Credential",
           :userid   => "user1",
           :password => ManageIQ::Password.encrypt("secret2"),
         }
       end
       let(:params_to_attributes) do
         {
-          :name     => "IBM Classic Infrastructure Credential",
+          :name     => "IBM Cloud Classic Infrastructure Credential",
           :userid   => "user1",
           :password => "secret2",
         }
       end
       let(:expected_values) do
         {
-          :name               => "IBM Classic Infrastructure Credential",
+          :name               => "IBM Cloud Classic Infrastructure Credential",
           :userid             => "user1",
           :password_encrypted => ManageIQ::Password.encrypt("secret2"),
         }

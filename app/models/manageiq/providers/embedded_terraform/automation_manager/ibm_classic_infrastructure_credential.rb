@@ -28,11 +28,11 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmClassicInfra
 
   API_OPTIONS = {
     :type       => 'cloud',
-    :label      => N_('IBM Classic Infrastructure'),
+    :label      => N_('IBM Cloud Classic Infrastructure'),
     :attributes => API_ATTRIBUTES
   }.freeze
 
   def self.display_name(number = 1)
-    n_('Credential (IBM Classic Infrastructure)', 'Credentials (IBM Classic Infrastructure)', number)
+    n_('Credential (IBM Cloud Classic Infrastructure)', 'Credentials (IBM Cloud Classic Infrastructure)', number)
   end
 end
