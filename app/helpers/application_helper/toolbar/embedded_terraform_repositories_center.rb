@@ -85,7 +85,7 @@ class ApplicationHelper::Toolbar::EmbeddedTerraformRepositoriesCenter < Applicat
                    :items   =>
                                [
                                  button(
-                                   :ansible_repository_tag,
+                                   :embedded_configuration_script_source_tag,
                                    'pficon pficon-edit fa-lg',
                                    N_('Edit Tags for the selected Terraform Repositories'),
                                    N_('Edit Tags'),

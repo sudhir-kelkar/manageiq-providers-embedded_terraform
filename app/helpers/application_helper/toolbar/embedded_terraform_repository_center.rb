@@ -63,7 +63,7 @@ class ApplicationHelper::Toolbar::EmbeddedTerraformRepositoryCenter < Applicatio
                    :items =>
                              [
                                button(
-                                 :ansible_repository_tag,
+                                 :embedded_configuration_script_source_tag,
                                  'pficon pficon-edit fa-lg',
                                  N_('Edit Tags for this Embedded Terraform Repository'),
                                  N_('Edit Tags')

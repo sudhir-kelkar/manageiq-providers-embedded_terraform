@@ -58,7 +58,7 @@ class ApplicationHelper::Toolbar::EmbeddedTerraformCredentialsCenter < Applicati
                    :onwhen  => "1+",
                    :items   => [
                      button(
-                       :ansible_credential_tag,
+                       :embedded_automation_manager_credential_tag,
                        'pficon pficon-edit fa-lg',
                        N_('Edit Tags for the selected Embedded Terraform Credentials'),
                        N_('Edit Tags'),

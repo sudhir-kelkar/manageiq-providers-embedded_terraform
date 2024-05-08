@@ -53,7 +53,7 @@ class EmbeddedTerraformRepositoryController < ApplicationController
         page << javascript_prologue
         page.replace("main_div", :template => "embedded_terraform_repository/show")
       end
-    when "ansible_repository_tag"
+    when "embedded_configuration_script_source_tag"
       tag(self.class.model)
     when "embedded_configuration_script_payload_tag" # templates from nested list
       tag(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Template)
