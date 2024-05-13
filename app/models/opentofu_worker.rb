@@ -49,6 +49,13 @@ class OpentofuWorker < MiqWorker
     }
   end
 
+  def configure_service_worker_deployment(definition)
+    super
+
+    definition[:spec][:template][:spec][:containers].first[:volumeMounts] << {:name => "cert-path", :mountPath => "/root"}
+    definition[:spec][:template][:spec][:volumes] << {:name => "cert-path", :secret => {:secretName => "application-certificate-secret", :items => [{:key => "httpd_crt", :path => "server.crt"}, {:key => "httpd_key", :path => "server.key"}], :defaultMode => 420}}
+  end
+
   def create_podman_secret
     return if AwesomeSpawn.run("runuser", :params => [[:login, "manageiq"], [:command, "podman secret exists --root=#{Rails.root.join("data/containers/storage")} opentofu-runner-secret"]]).success?
 
