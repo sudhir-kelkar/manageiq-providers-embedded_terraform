@@ -54,7 +54,7 @@ class OpentofuWorker < MiqWorker
     if ENV["API_SSL_SECRET_NAME"].present?
       definition[:spec][:template][:spec][:containers].first[:volumeMounts] << {:name => "cert-path", :mountPath => "/opt/app-root/src/config/cert"}
       definition[:spec][:template][:spec][:volumes] << {:name => "cert-path", :secret => {:secretName => ENV["API_SSL_SECRET_NAME"], :items => [{:key => "tf_runner_crt", :path => "tls.crt"}, {:key => "tf_runner_key", :path => "tls.key"}], :defaultMode => 420}}
-    end      
+    end
   end
 
   def create_podman_secret
