@@ -1,4 +1,6 @@
 class OpentofuWorker < MiqWorker
+  include MiqWorker::ServiceWorker
+
   self.required_roles        = ["embedded_terraform"]
   self.rails_worker          = false
   self.maximum_workers_count = 1
