@@ -13,12 +13,12 @@ class OpentofuWorker < MiqWorker
     "#{service_base_name}.service"
   end
 
-  def self.worker_deployment_name
-    "opentofu-runner"
-  end
-
   def self.kill_priority
     MiqWorkerType::KILL_PRIORITY_GENERIC_WORKERS
+  end
+
+  def worker_deployment_name
+    @worker_deployment_name ||= "#{deployment_prefix}opentofu-runner"
   end
 
   private
