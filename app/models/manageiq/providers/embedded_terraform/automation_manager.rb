@@ -1,4 +1,5 @@
 class ManageIQ::Providers::EmbeddedTerraform::AutomationManager < ManageIQ::Providers::EmbeddedAutomationManager
+  supports     :catalog
   supports_not :refresh_ems
 
   def self.hostname_required?
@@ -12,5 +13,9 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager < ManageIQ::Prov
 
   def self.description
     @description ||= "Embedded Terraform".freeze
+  end
+
+  def self.catalog_types
+    {"generic_terraform_template" => N_("Terraform Template")}
   end
 end
