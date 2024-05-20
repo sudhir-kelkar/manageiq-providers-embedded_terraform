@@ -539,47 +539,88 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Creden
 
       let(:params) do
         {
-          :name         => "IBM Cloud Credential",
-          :auth_key     => "secret1",
-          :classic_user => "user1",
-          :classic_key  => "secret2",
+          :name     => "IBM Cloud Credential",
+          :auth_key => "secret1",
         }
       end
       let(:queue_create_params) do
         {
-          :name         => "IBM Cloud Credential",
-          :auth_key     => ManageIQ::Password.encrypt("secret1"),
-          :classic_user => "user1",
-          :classic_key  => ManageIQ::Password.encrypt("secret2"),
+          :name     => "IBM Cloud Credential",
+          :auth_key => ManageIQ::Password.encrypt("secret1"),
         }
       end
       let(:params_to_attributes) do
         {
           :name     => "IBM Cloud Credential",
           :auth_key => "secret1",
+        }
+      end
+      let(:expected_values) do
+        {
+          :name               => "IBM Cloud Credential",
+          :auth_key_encrypted => ManageIQ::Password.encrypt("secret1"),
+          :auth_key           => "secret1"
+        }
+      end
+      let(:params_to_attrs) { [] }
+      let(:update_params) do
+        {
+          :name     => "Updated Credential",
+          :auth_key => "supersecret"
+        }
+      end
+      let(:update_queue_params) do
+        {
+          :name     => "Updated Credential",
+          :auth_key => ManageIQ::Password.encrypt("supersecret")
+        }
+      end
+    end
+  end
+
+  context "IbmClassicInfrastructureCredential" do
+    it_behaves_like 'an embedded_terraform credential' do
+      let(:credential_class) { embedded_terraform::IbmClassicInfrastructureCredential }
+
+      let(:params) do
+        {
+          :name     => "IBM Cloud Classic Infrastructure Credential",
+          :userid   => "user1",
+          :password => "secret2",
+        }
+      end
+      let(:queue_create_params) do
+        {
+          :name     => "IBM Cloud Classic Infrastructure Credential",
+          :userid   => "user1",
+          :password => ManageIQ::Password.encrypt("secret2"),
+        }
+      end
+      let(:params_to_attributes) do
+        {
+          :name     => "IBM Cloud Classic Infrastructure Credential",
           :userid   => "user1",
           :password => "secret2",
         }
       end
       let(:expected_values) do
         {
-          :name               => "IBM Cloud Credential",
-          :auth_key_encrypted => ManageIQ::Password.try_encrypt("secret1"),
+          :name               => "IBM Cloud Classic Infrastructure Credential",
           :userid             => "user1",
-          :password_encrypted => ManageIQ::Password.try_encrypt("secret2"),
+          :password_encrypted => ManageIQ::Password.encrypt("secret2"),
         }
       end
-      let(:params_to_attrs) { [:auth_key, :userid] }
+      let(:params_to_attrs) { [] }
       let(:update_params) do
         {
-          :name        => "Updated Credential",
-          :classic_key => "supersecret"
+          :name     => "Updated Credential",
+          :password => "supersecret"
         }
       end
       let(:update_queue_params) do
         {
-          :name        => "Updated Credential",
-          :classic_key => ManageIQ::Password.encrypt("supersecret")
+          :name     => "Updated Credential",
+          :password => ManageIQ::Password.encrypt("supersecret")
         }
       end
     end

@@ -1,8 +1,8 @@
 module Terraform
   class Runner
-    class IbmCloudCredential < Credential
+    class IbmClassicInfrastructureCredential < Credential
       def self.auth_type
-        "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmCloudCredential"
+        "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::IbmClassicInfrastructureCredential"
       end
 
       # Modeled off of IBM Cloud provider for terraform:
@@ -14,7 +14,8 @@ module Terraform
       def connection_parameters
         conn_params = []
 
-        ApiParams.add_param_if_present(conn_params, auth.auth_key, 'IC_API_KEY')
+        ApiParams.add_param_if_present(conn_params, auth.userid,   'IAAS_CLASSIC_USERNAME')
+        ApiParams.add_param_if_present(conn_params, auth.password, 'IAAS_CLASSIC_API_KEY')
 
         conn_params
       end
