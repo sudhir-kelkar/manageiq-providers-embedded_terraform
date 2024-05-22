@@ -5,7 +5,7 @@ class OpentofuWorker < MiqWorker
   self.rails_worker          = false
   self.maximum_workers_count = 1
 
-  HEALTH_PORT  = 6000
+  HEALTH_PORT = 6000
 
   def self.service_base_name
     "opentofu-runner"
@@ -28,7 +28,7 @@ class OpentofuWorker < MiqWorker
   end
 
   def add_liveness_probe(container_definition)
-    container_definition[:livenessProbe] = container_definition[:livenessProbe].except(:exec).merge(:httpGet => {:path => "/api/v1/ready", :port => HEALTH_PORT, :scheme => "HTTPS" })
+    container_definition[:livenessProbe] = container_definition[:livenessProbe].except(:exec).merge(:httpGet => {:path => "/api/v1/ready", :port => HEALTH_PORT, :scheme => "HTTPS"})
   end
 
   def add_readiness_probe(container_definition)
