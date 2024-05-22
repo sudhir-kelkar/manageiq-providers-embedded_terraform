@@ -5,8 +5,6 @@ class OpentofuWorker < MiqWorker
   self.rails_worker          = false
   self.maximum_workers_count = 1
 
-  STARTING_PORT = 6000
-
   def self.service_base_name
     "opentofu-runner"
   end
@@ -24,7 +22,7 @@ class OpentofuWorker < MiqWorker
   end
 
   def container_port
-    6001
+    6000
   end
 
   private
