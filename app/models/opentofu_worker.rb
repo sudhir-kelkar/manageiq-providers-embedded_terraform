@@ -83,6 +83,8 @@ class OpentofuWorker < MiqWorker
   end
 
   def create_tls_certs
+    opentofu_runner_certs_dir = Pathname.new("/var/lib/manageiq/opentofu-runner/certs")
+    opentofu_runner_certs_dir.mkpath unless opentofu_runner_certs_dir.exist?
   end
 
   def create_podman_secret
