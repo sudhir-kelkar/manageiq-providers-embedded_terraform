@@ -74,7 +74,9 @@ class OpentofuWorker < MiqWorker
       "DATABASE_USERNAME"     => database_configuration[:username],
       "MEMCACHE_SERVERS"      => ::Settings.session.memcache_server,
       "PORT"                  => container_port,
-      "OPENTOFU_RUNNER_IMAGE" => container_image
+      "OPENTOFU_RUNNER_IMAGE" => container_image,
+      "LOG4JS_LEVEL"          => ::Settings.log.level_embedded_terraform,
+      "TF_OFFLINE"            => worker_settings[:opentofu_offline]
     }
   end
 
