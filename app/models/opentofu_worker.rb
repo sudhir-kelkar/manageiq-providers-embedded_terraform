@@ -5,6 +5,11 @@ class OpentofuWorker < MiqWorker
   self.rails_worker          = false
   self.maximum_workers_count = 1
 
+  self.worker_settings_paths = [
+    %i[log level_embedded_terraform],
+    %i[workers worker_base opentofu_worker]
+  ]
+
   OPENTOFU_RUNTIME_DIR = "/var/lib/manageiq/opentofu-runner".freeze
   SERVICE_PORT = 6000
 
