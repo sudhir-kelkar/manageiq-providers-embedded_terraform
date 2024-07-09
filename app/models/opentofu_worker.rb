@@ -76,7 +76,7 @@ class OpentofuWorker < MiqWorker
       "PORT"                  => container_port,
       "OPENTOFU_RUNNER_IMAGE" => container_image,
       "LOG4JS_LEVEL"          => ::Settings.log.level_embedded_terraform,
-      "TF_OFFLINE"            => worker_settings[:opentofu_offline].to_s
+      "TF_OFFLINE"            => worker_settings[:opentofu_offline]
     }
   end
 
