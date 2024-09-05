@@ -10,8 +10,10 @@ RSpec.describe(Terraform::Runner) do
   before do
     stub_const("ENV", ENV.to_h.merge("TERRAFORM_RUNNER_URL" => terraform_runner_url))
 
-    @hello_world_create_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-create-success.json")))
-    @hello_world_retrieve_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-retrieve-success.json")))
+    @hello_world_create_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-create-in-progress.json")))
+    @hello_world_retrieve_create_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-retrieve-create-success.json")))
+    @hello_world_delete_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-delete-in-progress.json")))
+    @hello_world_retrieve_delete_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-delete-success.json")))
   end
 
   before do
@@ -51,7 +53,7 @@ RSpec.describe(Terraform::Runner) do
                       )
 
         retrieve_stub = stub_request(:post, "#{terraform_runner_url}/api/stack/retrieve")
-                        .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
+                        .with(:body => hash_including({:stack_id => @hello_world_retrieve_create_response['stack_id']}))
                         .to_return(
                           :status => 200,
                           :body   => @hello_world_create_response.to_json
@@ -99,11 +101,13 @@ RSpec.describe(Terraform::Runner) do
       retrieve_stub = nil
 
       before do
+        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
+
         retrieve_stub = stub_request(:post, "#{terraform_runner_url}/api/stack/retrieve")
-                        .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
+                        .with(:body => hash_including({:stack_id => @hello_world_retrieve_create_response['stack_id']}))
                         .to_return(
                           :status => 200,
-                          :body   => @hello_world_retrieve_response.to_json
+                          :body   => @hello_world_retrieve_create_response.to_json
                         )
       end
 
@@ -113,9 +117,9 @@ RSpec.describe(Terraform::Runner) do
 
         expect(response.status).to(eq('SUCCESS'), "terraform-runner failed with:\n#{response.status}")
         expect(response.message).to(include('greeting = "Hello World"'))
-        expect(response.stack_id).to(eq(@hello_world_retrieve_response['stack_id']))
+        expect(response.stack_id).to(eq(@hello_world_retrieve_create_response['stack_id']))
         expect(response.action).to(eq('CREATE'))
-        expect(response.stack_name).to(eq(@hello_world_retrieve_response['stack_name']))
+        expect(response.stack_name).to(eq(@hello_world_retrieve_create_response['stack_name']))
         expect(response.details.keys).to(eq(%w[resources outputs]))
 
         expect(retrieve_stub).to(have_been_requested.times(1))
@@ -139,7 +143,7 @@ RSpec.describe(Terraform::Runner) do
         cancel_response[:status] = 'CANCELLED'
 
         retrieve_stub = stub_request(:post, "#{terraform_runner_url}/api/stack/retrieve")
-                        .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
+                        .with(:body => hash_including({:stack_id => @hello_world_retrieve_create_response['stack_id']}))
                         .to_return(
                           :status => 200,
                           :body   => @hello_world_create_response.to_json
@@ -151,7 +155,7 @@ RSpec.describe(Terraform::Runner) do
                           :body   => cancel_response.to_json
                         )
         cancel_stub = stub_request(:post, "#{terraform_runner_url}/api/stack/cancel")
-                      .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
+                      .with(:body => hash_including({:stack_id => @hello_world_retrieve_create_response['stack_id']}))
                       .to_return(
                         :status => 200,
                         :body   => cancel_response.to_json
@@ -189,6 +193,60 @@ RSpec.describe(Terraform::Runner) do
         response = async_response.response
         expect(retrieve_stub).to(have_been_requested.times(3))
         expect(response.status).to(eq('CANCELLED'), "terraform-runner failed with:\n#{response.status}")
+      end
+    end
+
+    describe '.run_async with Retirement action' do
+      delete_stub = nil
+      delete_retrieve_stub = nil
+
+      def verify_req(req)
+        body = JSON.parse(req.body)
+        # expect(body["stack_id"]).to(eq(@hello_world_retrieve_delete_response['stack_id']))
+        # expect(body).to(have_key('templateZipFile'))
+        # # expect(body["parameters"]).to(eq([{"name" => "name", "value" => "New World", "secured" => "false"}]))
+        # expect(body["cloud_providers"]).to(eq([]))
+      end
+
+      before do
+        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
+
+        delete_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/delete")
+                      .with { |req| verify_req(req) }
+                      .to_return(
+                        :status => 200,
+                        :body   => @hello_world_delete_response.to_json
+                      )
+
+        delete_retrieve_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/retrieve")
+                               .with(:body => hash_including({:stack_id => @hello_world_retrieve_delete_response['stack_id']}))
+                               .to_return(
+                                 :status => 200,
+                                 :body   => @hello_world_retrieve_delete_response.to_json
+                               )
+      end
+
+      let(:input_vars) do
+        {
+          'name'                  => 'New World',
+          :miq_action             => 'Retirement',
+          :miq_terraform_stack_id => @hello_world_retrieve_delete_response['stack_id']
+        }
+      end
+
+      it "start running retirement for hello-world terraform template stack" do
+        async_response = Terraform::Runner.run_async(input_vars, File.join(__dir__, "runner/data/hello-world"))
+        expect(delete_stub).to(have_been_requested.times(1))
+
+        response = async_response.response
+        expect(delete_retrieve_stub).to(have_been_requested.times(1))
+        expect(response.stack_id).to(eq(@hello_world_delete_response['stack_id']))
+        expect(response.action).to(eq('DELETE'))
+        expect(response.stack_name).to(eq(@hello_world_delete_response['stack_name']))
+
+        expect(response.status).to(eq('SUCCESS'), "terraform-runner failed with:\n#{response.status}")
+        expect(response.message).to(include('Destroy complete! Resources: 1 destroyed.'))
+        expect(response.details).to(eq({"resources" => [], "outputs" => []}))
       end
     end
   end
