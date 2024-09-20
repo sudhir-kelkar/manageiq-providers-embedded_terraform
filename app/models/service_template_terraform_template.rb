@@ -17,6 +17,9 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
     transaction do
       create_from_options(options).tap do |service_template|
+        dialog_ids = service_template.send(:create_dialogs, config_info)
+        config_info.deep_merge!(dialog_ids)
+        service_template.options[:config_info].deep_merge!(dialog_ids)
         service_template.create_resource_actions(config_info)
       end
     end
@@ -41,4 +44,23 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
     ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Template.find(template_id)
   end
+
+  def create_dialogs(config_info)
+    # [:provision, :retirement, :reconfigure].each_with_object({}) do |action, hash|
+    [:provision,].each_with_object({}) do |action, hash|
+      info = config_info[action]
+      # next unless new_dialog_required?(info)
+
+      template_name = SecureRandom.alphanumeric # TODO: get template_name instead
+
+      new_dialog_name = info.key?(:new_dialog_name) ? info[:new_dialog_name] : "Dialog-#{template_name}"
+
+      hash[action] = {:dialog_id => create_new_dialog(info[:new_dialog_name], info[:extra_vars]).id}
+    end
+  end
+
+  def create_new_dialog(dialog_name, extra_vars)
+    Dialog::TerraformTemplateServiceDialog.create_dialog(dialog_name, extra_vars)
+  end
+  private :create_new_dialog
 end
