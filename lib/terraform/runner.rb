@@ -59,6 +59,13 @@ module Terraform
         retrieve_stack_job(stack_id)
       end
 
+      # Parse Terraform Template input/output variables  
+      # @param template_path [String] Path to the template we will want to parse for input/output variables
+      # @return [Terraform::Runner::VariablesResponse] Response object of terraform-runner api/template/variables
+      def parse_template_variables(template_path)
+        template_variables(template_path)
+      end
+
       # =================================================
       # TerraformRunner Stack-API interaction methods
       # =================================================
@@ -178,6 +185,26 @@ module Terraform
           end
           Base64.encode64(File.binread(zip_file_path))
         end
+      end
+
+      # Parse Variables in Terraform Template
+      def template_variables(
+        template_path
+      )
+        _log.info("prase template: #{template_path}")
+        encoded_zip_file = encoded_zip_from_directory(template_path)
+
+        # TODO: use tags,env_vars
+        payload = {
+          :templateZipFile => encoded_zip_file,
+        }
+
+        http_response = terraform_runner_client.post(
+          "api/template/variables",
+          *json_post_arguments(payload)
+        )
+        _log.debug("==== http_response.body: \n #{http_response.body}")
+        Terraform::Runner::VariablesResponse.parsed_response(http_response)
       end
 
       def jwt_token
