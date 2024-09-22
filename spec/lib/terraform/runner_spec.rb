@@ -352,4 +352,48 @@ RSpec.describe(Terraform::Runner) do
       end
     end
   end
+
+  context '.parse_template_variables hello-world' do
+    describe '.parse_template_variables input/output vars' do
+      template_variables_stub = nil
+
+      def verify_req(req)
+        body = JSON.parse(req.body)
+        expect(body).to(have_key('templateZipFile'))
+      end
+
+      before do
+        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
+
+        @hello_world_variables_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-variables-success.json")))
+
+        template_variables_stub = stub_request(:post, "https://1.2.3.4:7000/api/template/variables")
+                                  .with { |req| verify_req(req) }
+                                  .to_return(
+                                    :status => 200,
+                                    :body   => @hello_world_variables_response.to_json
+                                  )
+      end
+
+      it "parse input/output params from hello-world terraform template" do
+        response = Terraform::Runner.parse_template_variables(File.join(__dir__, "runner/data/hello-world"))
+        expect(template_variables_stub).to(have_been_requested.times(1))
+
+        expect(response.template_input_params.length).to(eq(1))
+        input_var = response.template_input_params[0]
+        expect(input_var["name"]).to(eq("name"))
+        expect(input_var["label"]).to(eq("name"))
+        expect(input_var["type"]).to(eq("string"))
+        expect(input_var["default"]).to(eq("World"))
+        expect(input_var["required"]).to(eq(true))
+        expect(input_var["secured"]).to(eq(false))
+
+        expect(response.template_output_params.length).to(eq(1))
+        output_var = response.template_output_params[0]
+        expect(output_var["name"]).to(eq("greeting"))
+        expect(output_var["label"]).to(eq("greeting"))
+        expect(output_var["secured"]).to(eq(false))
+      end
+    end
+  end
 end
