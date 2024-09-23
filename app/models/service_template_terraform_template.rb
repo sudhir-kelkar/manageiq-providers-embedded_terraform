@@ -55,12 +55,12 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
       new_dialog_name = info.key?(:new_dialog_name) ? info[:new_dialog_name] : "Dialog-#{template_name}"
 
-      hash[action] = {:dialog_id => create_new_dialog(info[:new_dialog_name], info[:extra_vars]).id}
+      hash[action] = {:dialog_id => create_new_dialog(new_dialog_name, terraform_template(action), info[:extra_vars]).id}
     end
   end
 
-  def create_new_dialog(dialog_name, extra_vars)
-    Dialog::TerraformTemplateServiceDialog.create_dialog(dialog_name, extra_vars)
+  def create_new_dialog(dialog_name, terraform_template, extra_vars)
+    Dialog::TerraformTemplateServiceDialog.create_dialog(dialog_name, terraform_template, extra_vars)
   end
   private :create_new_dialog
 end
