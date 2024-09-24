@@ -380,19 +380,26 @@ RSpec.describe(Terraform::Runner) do
         expect(template_variables_stub).to(have_been_requested.times(1))
 
         expect(response.template_input_params.length).to(eq(1))
-        input_var = response.template_input_params[0]
-        expect(input_var["name"]).to(eq("name"))
-        expect(input_var["label"]).to(eq("name"))
-        expect(input_var["type"]).to(eq("string"))
-        expect(input_var["default"]).to(eq("World"))
-        expect(input_var["required"]).to(eq(true))
-        expect(input_var["secured"]).to(eq(false))
+        expect(response.template_input_params.first).to include(
+          "name"        => "name",
+          "label"       => "name",
+          "type"        => "string",
+          "description" => "",
+          "required"    => true,
+          "secured"     => false,
+          "hidden"      => false,
+          "immutable"   => false,
+          "default"     => "World"
+        )
 
         expect(response.template_output_params.length).to(eq(1))
-        output_var = response.template_output_params[0]
-        expect(output_var["name"]).to(eq("greeting"))
-        expect(output_var["label"]).to(eq("greeting"))
-        expect(output_var["secured"]).to(eq(false))
+        expect(response.template_output_params.first).to include(
+          "name"        => "greeting",
+          "label"       => "greeting",
+          "description" => "",
+          "secured"     => false,
+          "hidden"      => false
+        )
       end
     end
   end
