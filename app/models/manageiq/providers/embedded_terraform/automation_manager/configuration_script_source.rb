@@ -79,7 +79,6 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
     git_checkout_tempdir = checkout_git_repo
 
     # traverse through files in git-worktree
-    # git_repository.update_repo - already done through checkout_git_repo
     git_repository.with_worktree do |worktree|
       worktree.ref = scm_branch
 
@@ -123,14 +122,14 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
   def checkout_git_repo
     git_checkout_tempdir = Dir.mktmpdir("embedded-terraform-runner-git")
 
-    _log.info("Checking out git repository to #{git_checkout_tempdir}...")
+    _log.debug("Checking out git repository to #{git_checkout_tempdir}...")
     checkout_git_repository(git_checkout_tempdir)
     git_checkout_tempdir
   end
 
   # clean temp dir
   def cleanup_git_repo(git_checkout_tempdir)
-    _log.info("Cleaning up git repository checked out at #{git_checkout_tempdir}...")
+    _log.debug("Cleaning up git repository checked out at #{git_checkout_tempdir}...")
     FileUtils.rm_rf(git_checkout_tempdir)
   rescue Errno::ENOENT
     nil
