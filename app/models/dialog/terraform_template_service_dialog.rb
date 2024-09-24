@@ -35,26 +35,17 @@ class Dialog
         :position => position
       ).tap do |dialog_group|
         input_vars.each_with_index do |(var_info), index|
-          key = var_info["name"]
-          value = var_info["default"]
-          required = var_info["required"]
-          readonly = var_info["immutable"]
-          hidden = var_info["hidden"]
-          label = var_info["label"]
-          description = var_info["description"]
-          if description.blank?
-            description = key
-          end
-
+          key, value, required, readonly, hidden, label, description = var_info.values_at(
+            "name", "default", "required", "immutable", "hidden", "label", "description"
+          )
           # TODO: use these when adding variable field
-          # type = var_info["type"]
-          # secured = var_info["secured"]
+          # type, secured = var_info.values_at("type", "secured")
 
-          if hidden == true
-            _log.info("Not adding text-box for hidden variable: #{key}")
-          else
-            add_variable_field(key, value, dialog_group, index, label, description, required, readonly)
-          end
+          next if hidden
+
+          add_variable_field(
+            key, value, dialog_group, index, label, description, required, readonly
+          )
         end
       end
     end
@@ -73,6 +64,8 @@ class Dialog
 
     def add_variable_field(key, value, group, position, label, description, required, read_only)
       value = value.to_json if [Hash, Array].include?(value.class)
+      description = key if description.blank?
+
       group.dialog_fields.build(
         :type           => "DialogFieldTextBox",
         :name           => "param_#{key}",
