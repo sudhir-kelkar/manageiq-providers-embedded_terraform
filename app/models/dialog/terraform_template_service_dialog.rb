@@ -1,5 +1,3 @@
-require "JSON"
-
 class Dialog
   class TerraformTemplateServiceDialog
     def self.create_dialog(label, terraform_template, extra_vars)
@@ -23,6 +21,7 @@ class Dialog
     private
 
     def add_template_variables_group(tab, position, terraform_template)
+      require "json"
       template_info = JSON.parse(terraform_template.payload)
       input_vars = template_info["input_vars"]
 
@@ -36,7 +35,6 @@ class Dialog
         input_vars.each_with_index do |(var_info), index|
           key = var_info["name"]
           value = var_info["default"]
-          value = value.to_json if [Hash, Array].include?(value.class)
           required = var_info["required"]
           readonly = var_info["immutable"]
           hidden = var_info["hidden"]
@@ -66,13 +64,13 @@ class Dialog
         :position => position
       ).tap do |dialog_group|
         extra_vars.transform_values { |val| val[:default] }.each_with_index do |(key, value), index|
-          value = value.to_json if [Hash, Array].include?(value.class)
           add_variable_field(key, value, dialog_group, index, key, key, false, false)
         end
       end
     end
 
     def add_variable_field(key, value, group, position, label, description, required, read_only)
+      value = value.to_json if [Hash, Array].include?(value.class)
       group.dialog_fields.build(
         :type           => "DialogFieldTextBox",
         :name           => "param_#{key}",
