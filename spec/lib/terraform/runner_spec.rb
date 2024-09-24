@@ -380,7 +380,7 @@ RSpec.describe(Terraform::Runner) do
         expect(template_variables_stub).to(have_been_requested.times(1))
 
         expect(response.template_input_params.length).to(eq(1))
-        expect(response.template_input_params.first).to include(
+        expect(response.template_input_params.first).to be_kind_of(Hash).and include(
           "name"        => "name",
           "label"       => "name",
           "type"        => "string",
@@ -393,7 +393,7 @@ RSpec.describe(Terraform::Runner) do
         )
 
         expect(response.template_output_params.length).to(eq(1))
-        expect(response.template_output_params.first).to include(
+        expect(response.template_output_params.first).to be_kind_of(Hash).and include(
           "name"        => "greeting",
           "label"       => "greeting",
           "description" => "",
