@@ -59,8 +59,9 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
     end
   end
 
+  private
+
   def create_new_dialog(dialog_name, terraform_template, extra_vars)
     Dialog::TerraformTemplateServiceDialog.create_dialog(dialog_name, terraform_template, extra_vars)
   end
-  private :create_new_dialog
 end
