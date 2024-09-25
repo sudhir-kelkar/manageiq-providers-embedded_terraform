@@ -106,7 +106,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
 
     template_dirs
   rescue => error
-    _log.error("Failing scaning for terraform templates in the git repo: ", error)
+    _log.error("Failing scaning for terraform templates in the git repo: #{error}")
     raise error
   ensure
     cleanup_git_repo(git_checkout_tempdir)
