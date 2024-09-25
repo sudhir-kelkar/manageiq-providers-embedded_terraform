@@ -68,7 +68,7 @@ class Dialog
 
       group.dialog_fields.build(
         :type           => "DialogFieldTextBox",
-        :name           => "param_#{key}",
+        :name           => "#{key}",
         :data_type      => "string",
         :display        => "edit",
         :required       => required,
