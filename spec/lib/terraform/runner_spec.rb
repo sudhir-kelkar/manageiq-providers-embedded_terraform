@@ -379,8 +379,9 @@ RSpec.describe(Terraform::Runner) do
         response = Terraform::Runner.parse_template_variables(File.join(__dir__, "runner/data/hello-world"))
         expect(template_variables_stub).to(have_been_requested.times(1))
 
-        expect(response.template_input_params.length).to(eq(1))
-        expect(response.template_input_params.first).to be_kind_of(Hash).and include(
+        template_input_params = response['template_input_params']
+        expect(template_input_params.length).to(eq(1))
+        expect(template_input_params.first).to be_kind_of(Hash).and include(
           "name"        => "name",
           "label"       => "name",
           "type"        => "string",
@@ -392,14 +393,18 @@ RSpec.describe(Terraform::Runner) do
           "default"     => "World"
         )
 
-        expect(response.template_output_params.length).to(eq(1))
-        expect(response.template_output_params.first).to be_kind_of(Hash).and include(
+        template_output_params = response['template_output_params']
+        expect(template_output_params.length).to(eq(1))
+        expect(template_output_params.first).to be_kind_of(Hash).and include(
           "name"        => "greeting",
           "label"       => "greeting",
           "description" => "",
           "secured"     => false,
           "hidden"      => false
         )
+
+        terraform_version = response['terraform_version']
+        expect(terraform_version).to eq('>= 1.1.0')
       end
     end
   end

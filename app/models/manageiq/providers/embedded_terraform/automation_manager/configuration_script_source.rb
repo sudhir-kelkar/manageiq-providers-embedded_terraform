@@ -115,7 +115,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
   # Parse template and return input-vars, output-vars & terraform-version
   def parse_vars_in_template(template_path)
     response = Terraform::Runner.parse_template_variables(template_path)
-    return response.template_input_params, response.template_output_params, response.terraform_version
+    return response['template_input_params'], response['template_output_params'], response['terraform_version']
   end
 
   # checkout git repo to temp dir
