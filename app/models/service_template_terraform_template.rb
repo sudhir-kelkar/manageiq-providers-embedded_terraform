@@ -19,7 +19,7 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
       create_from_options(options).tap do |service_template|
         dialog_ids = service_template.send(:create_dialogs, config_info)
         config_info.deep_merge!(dialog_ids)
-        service_template.options[:config_info].deep_merge!(dialog_ids)
+        service_template.options[:config_info] = config_info
         service_template.create_resource_actions(config_info)
       end
     end
