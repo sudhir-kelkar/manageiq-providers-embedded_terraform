@@ -59,7 +59,7 @@ module Terraform
         retrieve_stack_job(stack_id)
       end
 
-      # Parse Terraform Template input/output variables  
+      # Parse Terraform Template input/output variables
       # @param template_path [String] Path to the template we will want to parse for input/output variables
       # @return Response(body) object of terraform-runner api/template/variables,
       #         - the response object had template_input_params, template_output_params and terraform_version

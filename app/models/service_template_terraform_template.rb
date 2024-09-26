@@ -47,18 +47,18 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
   def create_dialogs(config_info)
     dialog_hash = {}
-    
+
     info = config_info[:provision]
-    if info 
+    if info
       # create new dialog, if required for :provision action
       if info.key?(:new_dialog_name) && !info.key?(:dialog_id)
-        provision_dialog_id = create_new_dialog(info[:new_dialog_name], template = terraform_template(:provision), info[:extra_vars]).id
+        provision_dialog_id = create_new_dialog(info[:new_dialog_name], terraform_template(:provision), info[:extra_vars]).id
         dialog_hash[:provision] = {:dialog_id => provision_dialog_id}
       else
         provision_dialog_id = info[:dialog_id]
       end
 
-      # For :retirement & :reconfigure,  we use the same dialog as in :provision action 
+      # For :retirement & :reconfigure,  we use the same dialog as in :provision action
       dialog_hash = [:retirement, :reconfigure].each_with_object(dialog_hash) do |action, hash|
         hash[action] = {:dialog_id => :provision_dialog_id}
       end
@@ -72,8 +72,4 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
   def create_new_dialog(dialog_name, terraform_template, extra_vars)
     Dialog::TerraformTemplateServiceDialog.create_dialog(dialog_name, terraform_template, extra_vars)
   end
-
-  def new_dialog_required?(info)
-    info && info.key?(:new_dialog_name) && !info.key?(:dialog_id)
-  end  
 end
