@@ -60,7 +60,7 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
       # For :retirement & :reconfigure,  we use the same dialog as in :provision action
       dialog_hash = [:retirement, :reconfigure].each_with_object(dialog_hash) do |action, hash|
-        hash[action] = {:dialog_id => :provision_dialog_id}
+        hash[action] = {:dialog_id => provision_dialog_id}
       end
     end
 
