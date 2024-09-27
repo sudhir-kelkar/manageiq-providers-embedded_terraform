@@ -129,6 +129,8 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
 
   # clean temp dir
   def cleanup_git_repo(git_checkout_tempdir)
+    return if git_checkout_tempdir.nil?
+
     _log.debug("Cleaning up git repository checked out at #{git_checkout_tempdir}...")
     FileUtils.rm_rf(git_checkout_tempdir)
   rescue Errno::ENOENT
