@@ -37,7 +37,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
     update!(:status => "successful", :last_updated_on => Time.zone.now, :last_update_error => nil)
   rescue => error
     update!(:status => "error", :last_updated_on => Time.zone.now, :last_update_error => error)
-    raise error
+    raise
   end
 
   # Return Template name, using relative_path's basename prefix,
@@ -107,7 +107,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationSc
     template_dirs
   rescue => error
     _log.error("Failing scaning for terraform templates in the git repo: #{error}")
-    raise error
+    raise
   ensure
     cleanup_git_repo(git_checkout_tempdir)
   end
