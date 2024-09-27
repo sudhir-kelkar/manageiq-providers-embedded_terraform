@@ -17,21 +17,23 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
     let(:repos)              { Dir.glob(File.join(repo_dir, "*")) }
     let(:repo_dir_structure) { %w[hello_world.tf] }
 
+    let(:hello_world_vars_response) do
+      JSON.parse(File.read(File.join(__dir__, "../../../../../lib/terraform/runner/data/responses/hello-world-variables-success.json")))
+    end
+
     def verify_req(req)
       body = JSON.parse(req.body)
       expect(body).to(have_key('templateZipFile'))
     end
 
     before do
-      @hello_world_variables_response = JSON.parse(File.read(File.join(__dir__, "../../../../../lib/terraform/runner/data/responses/hello-world-variables-success.json")))
-
       stub_const("ENV", ENV.to_h.merge("TERRAFORM_RUNNER_URL" => TERRAFORM_RUNNER_URL))
 
       stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/template/variables")
         .with { |req| verify_req(req) }
         .to_return(
           :status => 200,
-          :body   => @hello_world_variables_response.to_json
+          :body   => hello_world_vars_response.to_json
         )
 
       FileUtils.mkdir_p(local_repo)
@@ -105,9 +107,9 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
         expected_hash = {
           "relative_path"     => File.dirname(*repo_dir_structure),
           "files"             => [File.basename(*repo_dir_structure)],
-          "input_vars"        => @hello_world_variables_response['template_input_params'],
-          "output_vars"       => @hello_world_variables_response['template_output_params'],
-          "terraform_version" => @hello_world_variables_response['terraform_version']
+          "input_vars"        => hello_world_vars_response['template_input_params'],
+          "output_vars"       => hello_world_vars_response['template_output_params'],
+          "terraform_version" => hello_world_vars_response['terraform_version']
         }
 
         expect(payloads.first).to(eq(expected_hash.to_json))
@@ -138,9 +140,9 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
           expected_hash = {
             "relative_path"     => File.dirname(*nested_repo_structure),
             "files"             => [File.basename(*nested_repo_structure)],
-            "input_vars"        => @hello_world_variables_response['template_input_params'],
-            "output_vars"       => @hello_world_variables_response['template_output_params'],
-            "terraform_version" => @hello_world_variables_response['terraform_version']
+            "input_vars"        => hello_world_vars_response['template_input_params'],
+            "output_vars"       => hello_world_vars_response['template_output_params'],
+            "terraform_version" => hello_world_vars_response['terraform_version']
           }
 
           expect(payloads.first).to(eq(expected_hash.to_json))
@@ -196,17 +198,17 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
           expected_hash1 = {
             "relative_path"     => File.dirname(multiple_templates_repo_structure.first),
             "files"             => [File.basename(multiple_templates_repo_structure.first)],
-            "input_vars"        => @hello_world_variables_response['template_input_params'],
-            "output_vars"       => @hello_world_variables_response['template_output_params'],
-            "terraform_version" => @hello_world_variables_response['terraform_version']
+            "input_vars"        => hello_world_vars_response['template_input_params'],
+            "output_vars"       => hello_world_vars_response['template_output_params'],
+            "terraform_version" => hello_world_vars_response['terraform_version']
           }
 
           expected_hash2 = {
             "relative_path"     => File.dirname(multiple_templates_repo_structure.second),
             "files"             => [File.basename(multiple_templates_repo_structure.second)],
-            "input_vars"        => @hello_world_variables_response['template_input_params'],
-            "output_vars"       => @hello_world_variables_response['template_output_params'],
-            "terraform_version" => @hello_world_variables_response['terraform_version']
+            "input_vars"        => hello_world_vars_response['template_input_params'],
+            "output_vars"       => hello_world_vars_response['template_output_params'],
+            "terraform_version" => hello_world_vars_response['terraform_version']
           }
 
           expect(payloads).to(match_array([expected_hash1.to_json, expected_hash2.to_json]))
@@ -306,9 +308,9 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
           expected_hash = {
             "relative_path"     => File.dirname(*repo_dir_structure),
             "files"             => [File.basename(*repo_dir_structure)],
-            "input_vars"        => @hello_world_variables_response['template_input_params'],
-            "output_vars"       => @hello_world_variables_response['template_output_params'],
-            "terraform_version" => @hello_world_variables_response['terraform_version']
+            "input_vars"        => hello_world_vars_response['template_input_params'],
+            "output_vars"       => hello_world_vars_response['template_output_params'],
+            "terraform_version" => hello_world_vars_response['terraform_version']
           }
 
           expect(payloads.first).to(eq(expected_hash.to_json))
