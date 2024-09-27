@@ -1,12 +1,15 @@
 require 'webmock/rspec'
 require 'json'
 
+TERRAFORM_RUNNER_URL = "https://1.2.3.4:7000".freeze
+
 RSpec.describe(Terraform::Runner) do
   let(:embedded_terraform) { ManageIQ::Providers::EmbeddedTerraform::AutomationManager }
   let(:manager) { FactoryBot.create(:embedded_automation_manager_terraform) }
 
-  before(:all) do
-    ENV["TERRAFORM_RUNNER_TOKEN"] = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlNodWJoYW5naSBTaW5naCIsImlhdCI6MTcwNjAwMDk0M30.46mL8RRxfHI4yveZ2wTsHyF7s2BAiU84aruHBoz2JRQ'
+  before do
+    stub_const("ENV", ENV.to_h.merge("TERRAFORM_RUNNER_URL" => TERRAFORM_RUNNER_URL))
+
     @hello_world_create_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-create-success.json")))
     @hello_world_retrieve_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-retrieve-success.json")))
   end
@@ -17,9 +20,7 @@ RSpec.describe(Terraform::Runner) do
 
   describe "is .available" do
     before do
-      ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
-
-      stub_request(:get, "https://1.2.3.4:7000/ping")
+      stub_request(:get, "#{TERRAFORM_RUNNER_URL}/ping")
         .to_return(:status => 200, :body => {'count' => 0}.to_json)
     end
 
@@ -42,16 +43,14 @@ RSpec.describe(Terraform::Runner) do
       end
 
       before do
-        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
-
-        create_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/create")
+        create_stub = stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/create")
                       .with { |req| verify_req(req) }
                       .to_return(
                         :status => 200,
                         :body   => @hello_world_create_response.to_json
                       )
 
-        retrieve_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/retrieve")
+        retrieve_stub = stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/retrieve")
                         .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
                         .to_return(
                           :status => 200,
@@ -100,9 +99,7 @@ RSpec.describe(Terraform::Runner) do
       retrieve_stub = nil
 
       before do
-        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
-
-        retrieve_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/retrieve")
+        retrieve_stub = stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/retrieve")
                         .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
                         .to_return(
                           :status => 200,
@@ -131,9 +128,7 @@ RSpec.describe(Terraform::Runner) do
       cancel_stub = nil
 
       before do
-        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
-
-        create_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/create")
+        create_stub = stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/create")
                       .with(:body => hash_including({:parameters => [], :cloud_providers => []}))
                       .to_return(
                         :status => 200,
@@ -143,7 +138,7 @@ RSpec.describe(Terraform::Runner) do
         cancel_response = @hello_world_create_response.clone
         cancel_response[:status] = 'CANCELLED'
 
-        retrieve_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/retrieve")
+        retrieve_stub = stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/retrieve")
                         .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
                         .to_return(
                           :status => 200,
@@ -155,7 +150,7 @@ RSpec.describe(Terraform::Runner) do
                           :status => 200,
                           :body   => cancel_response.to_json
                         )
-        cancel_stub = stub_request(:post, "https://1.2.3.4:7000/api/stack/cancel")
+        cancel_stub = stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/cancel")
                       .with(:body => hash_including({:stack_id => @hello_world_retrieve_response['stack_id']}))
                       .to_return(
                         :status => 200,
@@ -245,10 +240,8 @@ RSpec.describe(Terraform::Runner) do
       create_stub = nil
 
       before do
-        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
-
         create_stub =
-          stub_request(:post, "https://1.2.3.4:7000/api/stack/create")
+          stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/create")
           .with { |req| verify_req(req) }
           .to_return(
             :status => 200,
@@ -329,10 +322,8 @@ RSpec.describe(Terraform::Runner) do
       create_stub = nil
 
       before do
-        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
-
         create_stub =
-          stub_request(:post, "https://1.2.3.4:7000/api/stack/create")
+          stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/stack/create")
           .with { |req| verify_req(req) }
           .to_return(
             :status => 200,
@@ -363,11 +354,9 @@ RSpec.describe(Terraform::Runner) do
       end
 
       before do
-        ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
-
         hello_world_variables_response = JSON.parse(File.read(File.join(__dir__, "runner/data/responses/hello-world-variables-success.json")))
 
-        template_variables_stub = stub_request(:post, "https://1.2.3.4:7000/api/template/variables")
+        template_variables_stub = stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/template/variables")
                                   .with { |req| verify_req(req) }
                                   .to_return(
                                     :status => 200,

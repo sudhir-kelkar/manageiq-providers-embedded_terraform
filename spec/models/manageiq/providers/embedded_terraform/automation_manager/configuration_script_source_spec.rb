@@ -1,3 +1,5 @@
+TERRAFORM_RUNNER_URL = 'https://1.2.3.4:7000'.freeze
+
 RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource) do
   context "with a local repo" do
     let(:manager) { FactoryBot.create(:embedded_automation_manager_terraform) }
@@ -21,14 +23,16 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
     end
 
     before do
-      ENV["TERRAFORM_RUNNER_URL"] = "https://1.2.3.4:7000"
       @hello_world_variables_response = JSON.parse(File.read(File.join(__dir__, "../../../../../lib/terraform/runner/data/responses/hello-world-variables-success.json")))
-      @template_variables_stub = stub_request(:post, "https://1.2.3.4:7000/api/template/variables")
-                                 .with { |req| verify_req(req) }
-                                 .to_return(
-                                   :status => 200,
-                                   :body   => @hello_world_variables_response.to_json
-                                 )
+
+      stub_const("ENV", ENV.to_h.merge("TERRAFORM_RUNNER_URL" => TERRAFORM_RUNNER_URL))
+
+      stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/template/variables")
+        .with { |req| verify_req(req) }
+        .to_return(
+          :status => 200,
+          :body   => @hello_world_variables_response.to_json
+        )
 
       FileUtils.mkdir_p(local_repo)
 
