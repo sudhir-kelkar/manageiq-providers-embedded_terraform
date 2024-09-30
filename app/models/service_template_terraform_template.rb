@@ -25,6 +25,20 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
     end
   end
 
+  def update_catalog_item(options, auth_user = nil)
+    config_info = validate_update_config_info(options)
+    unless config_info
+      update!(options)
+      return reload
+    end
+
+    config_info.deep_merge!(create_dialogs(config_info))
+
+    options[:config_info] = config_info
+
+    super
+  end
+
   def self.validate_config_info(info)
     info[:provision][:fqname]   ||= default_provisioning_entry_point(SERVICE_TYPE_ATOMIC) if info.key?(:provision)
     info[:reconfigure][:fqname] ||= default_reconfiguration_entry_point if info.key?(:reconfigure)
@@ -71,5 +85,12 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
   def create_new_dialog(dialog_name, terraform_template, extra_vars)
     Dialog::TerraformTemplateServiceDialog.create_dialog(dialog_name, terraform_template, extra_vars)
+  end
+
+  def validate_update_config_info(options)
+    opts = super
+    return unless options.key?(:config_info)
+
+    self.class.send(:validate_config_info, opts)
   end
 end
