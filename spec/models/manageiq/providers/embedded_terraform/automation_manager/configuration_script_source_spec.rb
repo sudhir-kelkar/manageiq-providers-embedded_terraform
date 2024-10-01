@@ -1,6 +1,6 @@
-TERRAFORM_RUNNER_URL = 'https://1.2.3.4:7000'.freeze
-
 RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource) do
+  let(:terraform_runner_url) { "https://1.2.3.4:7000" }
+
   context "with a local repo" do
     let(:manager) { FactoryBot.create(:embedded_automation_manager_terraform) }
 
@@ -27,9 +27,9 @@ RSpec.describe(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Config
     end
 
     before do
-      stub_const("ENV", ENV.to_h.merge("TERRAFORM_RUNNER_URL" => TERRAFORM_RUNNER_URL))
+      stub_const("ENV", ENV.to_h.merge("TERRAFORM_RUNNER_URL" => terraform_runner_url))
 
-      stub_request(:post, "#{TERRAFORM_RUNNER_URL}/api/template/variables")
+      stub_request(:post, "#{terraform_runner_url}/api/template/variables")
         .with { |req| verify_req(req) }
         .to_return(
           :status => 200,
