@@ -20,7 +20,7 @@ class Dialog
         if position == 0
           # if not template input vars & no extra_vars,
           # then add single variable text box as place-holder
-          add_variables_group(tab, position, {:name=>{:default=>label}})
+          add_variables_group(tab, position, {:name => {:default => label}})
         end
 
         dialog.save!
