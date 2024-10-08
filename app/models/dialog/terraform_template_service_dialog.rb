@@ -9,8 +9,7 @@ class Dialog
       Dialog.new(:label => label, :buttons => "submit,cancel").tap do |dialog|
         tab = dialog.dialog_tabs.build(:display => "edit", :label => "Basic Information", :position => 0)
         position = 0
-        if terraform_template.present?
-          add_template_variables_group(tab, position, terraform_template)
+        if terraform_template.present? && add_template_variables_group(tab, position, terraform_template)
           position += 1
         end
         if extra_vars.present?
