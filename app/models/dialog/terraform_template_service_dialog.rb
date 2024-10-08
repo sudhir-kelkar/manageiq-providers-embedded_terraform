@@ -27,7 +27,7 @@ class Dialog
       template_info = JSON.parse(terraform_template.payload)
       input_vars = template_info["input_vars"]
 
-      return if input_vars.nil?
+      return if input_vars.blank?
 
       tab.dialog_groups.build(
         :display  => "edit",
