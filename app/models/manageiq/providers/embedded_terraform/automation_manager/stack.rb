@@ -94,13 +94,13 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack < ManageI
   end
 
   def raw_stdout_txt
-    job = Job.find_by(:miq_task_id => miq_task.id)
+    job = miq_task.job
     terraform_stack_id = job.options[:terraform_stack_id]
 
-    if terraform_stack_id
-      response = Terraform::Runner.fetch_result_by_stack_id(terraform_stack_id)
-      response.message
-    end
+    return if terraform_stack_id.blank?
+
+    response = Terraform::Runner.fetch_result_by_stack_id(terraform_stack_id)
+    response.message
   end
 
   def raw_stdout_html
