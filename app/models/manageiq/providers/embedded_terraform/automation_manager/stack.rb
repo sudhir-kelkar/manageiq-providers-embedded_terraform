@@ -55,8 +55,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack < ManageI
     Status.new(miq_task)
   end
 
-  # Intend to be called by UI to display stdout. The stdout is stored in MiqTask#task_results or #message if error
-  # Since the task_results may contain a large block of data, it is desired to remove the task upon receiving the data
+  # Intend to be called by UI to display stdout. The stdout is stored in TerraformRunner(api/stack#message)
   def raw_stdout_via_worker(userid, format = 'txt')
     unless MiqRegion.my_region.role_active?("embedded_terraform")
       msg = "Cannot get standard output of this terraform-template because the embedded terraform role is not enabled"
