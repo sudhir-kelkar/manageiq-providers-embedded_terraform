@@ -90,7 +90,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack < ManageI
   end
 
   def raw_stdout_json
-    raw_stdout_txt.split("\n")
+    raise NotImplementedError, _("raw_stdout_json must be implemented, if required")
   end
 
   def raw_stdout_txt
