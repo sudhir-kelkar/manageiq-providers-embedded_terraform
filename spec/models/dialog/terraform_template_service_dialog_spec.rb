@@ -1,8 +1,44 @@
 RSpec.describe Dialog::TerraformTemplateServiceDialog do
+  let(:payload_with_one_required_input_var) do
+    '{"input_vars":[{"name":"name","label":"name","type":"string","description":"","required":true,"secured":false,"hidden":false,"immutable":false}]}'
+  end
+  let(:terraform_template_with_single_input_var) { FactoryBot.create(:terraform_template, :payload => payload_with_one_required_input_var) }
+
+  let(:payload_with_three_input_vars) do
+    '{"input_vars":[{"name":"create_wait","label":"create_wait","type":"string","description":"","required":true,"secured":false,"hidden":false,"immutable":false,"default":"30s"},{"name":"destroy_wait","label":"destroy_wait","type":"string","description":"","required":true,"secured":false,"hidden":false,"immutable":false,"default":"30s"},{"name":"name","label":"name","type":"string","description":"","required":true,"secured":false,"hidden":false,"immutable":false,"default":"World"}]}'
+  end
+  let(:terraform_template_with_input_vars) { FactoryBot.create(:terraform_template, :payload => payload_with_three_input_vars) }
+
   let(:terraform_template_with_no_input_vars) { FactoryBot.create(:terraform_template, :payload => '{"input_vars": []}') }
 
   describe "#create_dialog" do
-    context "with no template input vars, but with extra vars" do
+    context "with terraform template" do
+      it "when single required input var (no default value)" do
+        dialog_label = "myterraformdialog1"
+        dialog = described_class.create_dialog(dialog_label, terraform_template_with_single_input_var, {})
+
+        require 'json'
+        payload = JSON.parse(payload_with_one_required_input_var)
+        input_vars = payload['input_vars']
+
+        group = assert_terraform_template_variables_tab(dialog)
+        assert_terraform_variables_group(group, input_vars)
+      end
+
+      it "when input vars with default values" do
+        dialog_label = "myterraformdialog2"
+        dialog = described_class.create_dialog(dialog_label, terraform_template_with_input_vars, {})
+
+        require 'json'
+        payload = JSON.parse(payload_with_three_input_vars)
+        input_vars = payload['input_vars']
+
+        group = assert_terraform_template_variables_tab(dialog)
+        assert_terraform_variables_group(group, input_vars)
+      end
+    end
+
+    context "with no terraform template input vars, but with extra vars" do
       it "creates a dialog with extra variables" do
         extra_vars = {
           'some_extra_var'  => {:default => 'blah'},
@@ -19,7 +55,7 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
     end
 
     context "with place-holder variable argument" do
-      it "when empty template input vars & empty extra vars" do
+      it "when empty terraform template input vars & empty extra vars" do
         dialog_label = "mydialog2"
         dialog = described_class.create_dialog(dialog_label, terraform_template_with_no_input_vars, {})
 
@@ -27,7 +63,7 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
         assert_default_variables_group(group, dialog_label)
       end
 
-      it "when nil template & nil extra vars" do
+      it "when nil terraform template & nil extra vars" do
         dialog_label = "mydialog3"
         dialog = described_class.create_dialog(dialog_label, nil, nil)
 
@@ -48,6 +84,23 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
     expect(groups.size).to eq(1)
 
     groups[0]
+  end
+
+  def assert_terraform_template_variables_tab(dialog)
+    tabs = dialog.dialog_tabs
+    expect(tabs.size).to eq(1)
+
+    tab0 = tabs[0]
+    assert_tab_attributes(tab0)
+
+    groups = tab0.dialog_groups
+    expect(groups.size).to eq(1)
+
+    group0 = groups[0]
+
+    expect(group0).to have_attributes(:label => "Terraform Template Variables", :display => "edit")
+
+    group0
   end
 
   def assert_tab_attributes(tab)
@@ -77,5 +130,16 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
     expect(fields.size).to eq(1)
 
     assert_field(fields[0], DialogFieldTextBox, :name => 'name', :default_value => field_value, :data_type => 'string')
+  end
+
+  def assert_terraform_variables_group(group, input_vars)
+    expect(group).to have_attributes(:label => "Terraform Template Variables", :display => "edit")
+
+    fields = group.dialog_fields
+    expect(fields.size).to eq(input_vars.length)
+
+    input_vars.each_with_index do |var, index|
+      assert_field(fields[index], DialogFieldTextBox, :name => var['name'], :default_value => var['default'], :data_type => 'string')
+    end
   end
 end
