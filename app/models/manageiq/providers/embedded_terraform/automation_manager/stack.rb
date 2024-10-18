@@ -89,20 +89,29 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack < ManageI
   end
 
   def raw_stdout_txt
-    return '' if miq_task.nil? || miq_task.job.nil?
+    data = terraform_runner_stack_data
 
-    job = miq_task.job
-    terraform_stack_id = job.options[:terraform_stack_id]
+    return '' if data.nil?
 
-    return '' if terraform_stack_id.blank?
-
-    response = Terraform::Runner.fetch_result_by_stack_id(terraform_stack_id)
-    response.message
+    data.message
   end
 
   def raw_stdout_html
     text = raw_stdout_txt
     text = _("No output available") if text.blank?
     TerminalToHtml.render(text)
+  end
+
+  private
+
+  def terraform_runner_stack_data
+    return if miq_task.nil? || miq_task.job.nil?
+
+    job = miq_task.job
+    terraform_stack_id = job.options[:terraform_stack_id]
+
+    return if terraform_stack_id.blank?
+
+    Terraform::Runner.fetch_result_by_stack_id(terraform_stack_id)
   end
 end

@@ -35,7 +35,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
     let(:stack) { FactoryBot.create(:terraform_stack) }
     let(:template) { FactoryBot.create(:terraform_template) }
 
-    shared_examples_for "terraform runner stdout not valid in miq_task" do
+    shared_examples_for "terraform runner stdout not available from miq_task" do
       it "json" do
         expect(stack.raw_stdout("json")).to eq("")
       end
@@ -62,7 +62,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
         stack.miq_task = nil
       end
 
-      it_behaves_like "terraform runner stdout not valid in miq_task"
+      it_behaves_like "terraform runner stdout not available from miq_task"
     end
 
     context "when miq_task present, but missing miq_task.job" do
@@ -71,7 +71,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
         stack.miq_task.job = nil
       end
 
-      it_behaves_like "terraform runner stdout not valid in miq_task"
+      it_behaves_like "terraform runner stdout not available from miq_task"
     end
 
     context "when miq_task.job.options present but missing terraform_stack_id" do
@@ -83,7 +83,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
         end
       end
 
-      it_behaves_like "terraform runner stdout not valid in miq_task"
+      it_behaves_like "terraform runner stdout not available from miq_task"
     end
   end
 end
