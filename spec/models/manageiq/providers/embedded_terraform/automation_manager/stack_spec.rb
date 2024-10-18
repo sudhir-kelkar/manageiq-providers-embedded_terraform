@@ -30,4 +30,60 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
       end
     end
   end
+
+  describe "#raw_stdout" do
+    let(:stack) { FactoryBot.create(:terraform_stack) }
+    let(:template) { FactoryBot.create(:terraform_template) }
+
+    shared_examples_for "terraform runner stdout not valid in miq_task" do
+      it "json" do
+        expect(stack.raw_stdout("json")).to eq("")
+      end
+
+      it "txt" do
+        expect(stack.raw_stdout("txt")).to eq ""
+      end
+
+      it "html" do
+        expect(stack.raw_stdout("html")).to include <<~EOHTML
+          <div class='term-container'>
+          No output available
+          </div>
+        EOHTML
+      end
+
+      it "nil" do
+        expect(stack.raw_stdout).to eq ""
+      end
+    end
+
+    context "when miq_task is missing" do
+      before do
+        stack.miq_task = nil
+      end
+
+      it_behaves_like "terraform runner stdout not valid in miq_task"
+    end
+
+    context "when miq_task present, but missing miq_task.job" do
+      before do
+        stack.miq_task = FactoryBot.create(:miq_task)
+        stack.miq_task.job = nil
+      end
+
+      it_behaves_like "terraform runner stdout not valid in miq_task"
+    end
+
+    context "when miq_task.job.options present but missing terraform_stack_id" do
+      before do
+        stack.miq_task = FactoryBot.create(:miq_task)
+        stack.miq_task.job = ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job.create_job(template, {}, {}, []).tap do |job|
+          job.state = "waiting_to_start"
+          job.options = {}
+        end
+      end
+
+      it_behaves_like "terraform runner stdout not valid in miq_task"
+    end
+  end
 end
