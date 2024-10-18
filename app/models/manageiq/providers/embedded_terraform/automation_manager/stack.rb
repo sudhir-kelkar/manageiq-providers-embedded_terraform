@@ -90,10 +90,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack < ManageI
 
   def raw_stdout_txt
     data = terraform_runner_stack_data
-
-    return '' if data.nil?
-
-    data.message
+    data&.message
   end
 
   def raw_stdout_html

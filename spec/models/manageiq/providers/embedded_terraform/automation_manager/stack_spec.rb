@@ -84,11 +84,11 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
 
     shared_examples_for "terraform runner stdout not available from miq_task" do
       it "json" do
-        expect(stack.raw_stdout("json")).to eq("")
+        expect(stack.raw_stdout("json")).to be_nil
       end
 
       it "txt" do
-        expect(stack.raw_stdout("txt")).to eq ""
+        expect(stack.raw_stdout("txt")).to be_nil
       end
 
       it "html" do
@@ -100,7 +100,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
       end
 
       it "nil" do
-        expect(stack.raw_stdout).to eq ""
+        expect(stack.raw_stdout).to be_nil
       end
     end
 
