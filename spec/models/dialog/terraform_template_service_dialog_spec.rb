@@ -1,7 +1,7 @@
 RSpec.describe Dialog::TerraformTemplateServiceDialog do
-  describe "#create_dialog" do
-    let(:terraform_template_with_no_input_vars) { nil }
+  let(:terraform_template_with_no_input_vars) { FactoryBot.create(:terraform_template, :payload => '{"input_vars": []}') }
 
+  describe "#create_dialog" do
     context "with no template input vars, but with extra vars" do
       it "creates a dialog with extra variables" do
         extra_vars = {
@@ -17,23 +17,23 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
         assert_extra_variables_group(group)
       end
     end
-  end
 
-  context "with no template input vars, nor extra vars" do
-    it "creates a dialog with place-holder variable argument, when nil template & empty extra vars" do
-      dialog_label = "mydialog2"
-      dialog = described_class.create_dialog(dialog_label, nil, {})
+    context "with place-holder variable argument" do
+      it "when empty template input vars & empty extra vars" do
+        dialog_label = "mydialog2"
+        dialog = described_class.create_dialog(dialog_label, terraform_template_with_no_input_vars, {})
 
-      group = assert_default_tab(dialog)
-      assert_default_variables_group(group, dialog_label)
-    end
+        group = assert_default_tab(dialog)
+        assert_default_variables_group(group, dialog_label)
+      end
 
-    it "creates a dialog with place-holder variable argument, when nil template & nil extra vars" do
-      dialog_label = "mydialog3"
-      dialog = described_class.create_dialog(dialog_label, nil, nil)
+      it "when nil template & nil extra vars" do
+        dialog_label = "mydialog3"
+        dialog = described_class.create_dialog(dialog_label, nil, nil)
 
-      group = assert_default_tab(dialog)
-      assert_default_variables_group(group, dialog_label)
+        group = assert_default_tab(dialog)
+        assert_default_variables_group(group, dialog_label)
+      end
     end
   end
 
