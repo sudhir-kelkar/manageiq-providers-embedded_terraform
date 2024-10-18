@@ -41,11 +41,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
         require 'json'
         JSON.parse(File.read(File.join(__dir__, "../../../../../lib/terraform/runner/data/responses/hello-world-retrieve-success.json")))
       end
-      let(:miq_task) do
-        miq_task = FactoryBot.create(:miq_task)
-        miq_task.job = job
-        miq_task
-      end
+      let(:miq_task) { FactoryBot.create(:miq_task, :job => job) }
 
       let(:job) do
         ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job.create_job(template, {}, {}, []).tap do |job|
@@ -121,7 +117,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
       end
     end
 
-    context "when miq_task.job is missing" do
+    context "when miq_task is missing" do
       before do
         stack.miq_task = nil
       end
