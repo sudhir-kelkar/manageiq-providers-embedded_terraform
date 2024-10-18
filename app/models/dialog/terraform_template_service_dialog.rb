@@ -60,7 +60,7 @@ class Dialog
     def add_variables_group(tab, position, extra_vars)
       tab.dialog_groups.build(
         :display  => "edit",
-        :label    => "Extra Variables",
+        :label    => "Variables",
         :position => position
       ).tap do |dialog_group|
         extra_vars.transform_values { |val| val[:default] }.each_with_index do |(key, value), index|
