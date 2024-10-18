@@ -83,14 +83,9 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack < ManageI
 
   def raw_stdout(format = 'txt')
     case format
-    when "json" then raw_stdout_json
     when "html" then raw_stdout_html
     else             raw_stdout_txt
     end
-  end
-
-  def raw_stdout_json
-    raise NotImplementedError, _("raw_stdout_json must be implemented, if required")
   end
 
   def raw_stdout_txt
