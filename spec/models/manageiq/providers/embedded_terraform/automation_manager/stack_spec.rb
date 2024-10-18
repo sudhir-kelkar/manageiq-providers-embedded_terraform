@@ -36,10 +36,9 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
     let(:template) { FactoryBot.create(:terraform_template) }
 
     context "when miq_task.job present" do
-      require 'webmock/rspec'
-      require 'json'
       let(:terraform_runner_url) { "https://1.2.3.4:7000" }
       let(:hello_world_retrieve_response) do
+        require 'json'
         JSON.parse(File.read(File.join(__dir__, "../../../../../lib/terraform/runner/data/responses/hello-world-retrieve-success.json")))
       end
       let(:miq_task) do
