@@ -1,7 +1,7 @@
 RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack do
-  describe "#raw_status" do
-    let(:stack) { FactoryBot.create(:terraform_stack, :miq_task => miq_task) }
+  let(:stack) { FactoryBot.create(:terraform_stack, :miq_task => miq_task) }
 
+  describe "#raw_status" do
     context "with a running deployment" do
       let(:miq_task) { FactoryBot.create(:miq_task, :state => "Running", :status => "Ok", :message => "process initiated") }
 
@@ -32,7 +32,6 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
   end
 
   describe "#raw_stdout" do
-    let(:stack) { FactoryBot.create(:terraform_stack) }
     let(:template) { FactoryBot.create(:terraform_template) }
 
     context "when miq_task.job present" do
@@ -56,8 +55,6 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
       let(:terraform_runner_stdout_html) { TerminalToHtml.render(terraform_runner_stdout) }
 
       before do
-        stack.miq_task = miq_task
-
         stub_const("ENV", ENV.to_h.merge("TERRAFORM_RUNNER_URL" => terraform_runner_url))
 
         stub_request(:post, "#{terraform_runner_url}/api/stack/retrieve")
@@ -86,10 +83,6 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
     end
 
     shared_examples_for "terraform runner stdout not available from miq_task" do
-      before do
-        stack.miq_task = miq_task
-      end
-
       it "json" do
         expect(stack.raw_stdout("json")).to eq("")
       end
