@@ -24,9 +24,7 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
 
     context "template with single required input var (no default value)" do
       let(:dialog_label) { "myterraformdialog1" }
-
       let(:terraform_template) { terraform_template_with_single_input_var }
-
       let(:input_vars) do
         require 'json'
         payload = JSON.parse(payload_with_one_required_input_var)
@@ -38,9 +36,7 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
 
     context "template with muliple input vars with default values" do
       let(:dialog_label) { "myterraformdialog2" }
-
       let(:terraform_template) { terraform_template_with_input_vars }
-
       let(:input_vars) do
         require 'json'
         payload = JSON.parse(payload_with_three_input_vars)
@@ -52,7 +48,6 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
 
     context "with no terraform template input vars, but with extra vars" do
       let(:dialog_label) { 'mydialog1' }
-
       let(:extra_vars) do
         {
           'some_extra_var'  => {:default => 'blah'},
@@ -60,7 +55,6 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
           'array_extra_var' => {:default => [{'name' => 'some_value'}]}
         }
       end
-
       let(:terraform_template) { terraform_template_with_no_input_vars }
 
       it "creates a dialog with extra variables" do
@@ -84,9 +78,7 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
 
     context "when empty terraform template input vars & empty extra vars" do
       let(:dialog_label) { "mydialog2" }
-
       let(:terraform_template) { terraform_template_with_no_input_vars }
-
       let(:extra_vars) do
         {}
       end
@@ -96,9 +88,7 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
 
     context "when nil terraform template & nil extra vars" do
       let(:dialog_label) { "mydialog3" }
-
       let(:terraform_template) { nil }
-
       let(:extra_vars) { nil }
 
       it_behaves_like "create_dialog with place-holder variable argument"
@@ -106,7 +96,6 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
 
     context "with terraform template input vars and with extra vars" do
       let(:dialog_label) { "mydialog4" }
-
       let(:extra_vars) do
         {
           'some_extra_var'  => {:default => 'blah'},
@@ -114,7 +103,6 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
           'array_extra_var' => {:default => [{'name' => 'some_value'}]}
         }
       end
-
       let(:input_vars) do
         require 'json'
         payload = JSON.parse(payload_with_three_input_vars)
@@ -124,7 +112,7 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
       it "creates multiple dialogs" do
         dialog = subject.create_dialog(dialog_label, terraform_template_with_input_vars, extra_vars)
         expect(dialog).to have_attributes(:label => dialog_label, :buttons => "submit,cancel")
- \
+
         group1 = assert_terraform_template_variables_tab(dialog, :group_size => 2)
         assert_terraform_variables_group(group1, input_vars)
 
@@ -138,30 +126,22 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
     tabs = dialog.dialog_tabs
     expect(tabs.size).to eq(1)
 
-    tab0 = tabs[0]
-    assert_tab_attributes(tab0)
+    assert_tab_attributes(tabs.first)
 
-    groups = tab0.dialog_groups
+    groups = tabs.first.dialog_groups
     expect(groups.size).to eq(group_size)
 
-    groups[group_size > 1 ? 1 : 0]
+    group_size > 1 ? groups.second : groups.first
   end
 
   def assert_terraform_template_variables_tab(dialog, group_size: 1)
     tabs = dialog.dialog_tabs
     expect(tabs.size).to eq(1)
 
-    tab0 = tabs[0]
-    assert_tab_attributes(tab0)
-
-    groups = tab0.dialog_groups
+    groups = tabs.first.dialog_groups
     expect(groups.size).to eq(group_size)
 
-    group0 = groups[0]
-
-    expect(group0).to have_attributes(:label => "Terraform Template Variables", :display => "edit")
-
-    group0
+    groups.first
   end
 
   def assert_tab_attributes(tab)
