@@ -148,8 +148,8 @@ RSpec.describe Dialog::TerraformTemplateServiceDialog do
     expect(tab).to have_attributes(:label => "Basic Information", :display => "edit")
   end
 
-  def assert_field(field, clss, attributes)
-    expect(field).to be_kind_of clss
+  def assert_field(field, klass, attributes)
+    expect(field).to be_kind_of klass
     expect(field).to have_attributes(attributes)
   end
 
