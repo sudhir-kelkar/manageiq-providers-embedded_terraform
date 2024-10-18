@@ -86,6 +86,10 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
     end
 
     shared_examples_for "terraform runner stdout not available from miq_task" do
+      before do
+        stack.miq_task = miq_task
+      end
+
       it "json" do
         expect(stack.raw_stdout("json")).to eq("")
       end
@@ -108,30 +112,26 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
     end
 
     context "when miq_task is missing" do
-      before do
-        stack.miq_task = nil
-      end
+      let(:miq_task) { nil }
 
       it_behaves_like "terraform runner stdout not available from miq_task"
     end
 
     context "when miq_task present, but missing miq_task.job" do
-      before do
-        stack.miq_task = FactoryBot.create(:miq_task)
-        stack.miq_task.job = nil
-      end
+      let(:miq_task) { FactoryBot.create(:miq_task, :job => nil) }
 
       it_behaves_like "terraform runner stdout not available from miq_task"
     end
 
     context "when miq_task.job.options present but missing terraform_stack_id" do
-      before do
-        stack.miq_task = FactoryBot.create(:miq_task)
-        stack.miq_task.job = ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job.create_job(template, {}, {}, []).tap do |job|
+      let(:job) do
+        ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job.create_job(template, {}, {}, []).tap do |job|
           job.state = "waiting_to_start"
           job.options = {}
         end
       end
+
+      let(:miq_task) { FactoryBot.create(:miq_task, :job => job) }
 
       it_behaves_like "terraform runner stdout not available from miq_task"
     end
