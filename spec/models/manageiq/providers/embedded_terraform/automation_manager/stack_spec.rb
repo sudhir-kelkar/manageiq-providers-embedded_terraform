@@ -1,7 +1,7 @@
 RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack do
-  let(:stack) { FactoryBot.create(:terraform_stack, :miq_task => miq_task) }
-
   describe "#raw_status" do
+    let(:stack) { FactoryBot.create(:terraform_stack, :miq_task => miq_task) }
+
     context "with a running deployment" do
       let(:miq_task) { FactoryBot.create(:miq_task, :state => "Running", :status => "Ok", :message => "process initiated") }
 
@@ -32,6 +32,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
   end
 
   describe "#raw_stdout" do
+    let(:stack) { FactoryBot.create(:terraform_stack, :miq_task => miq_task) }
     let(:template) { FactoryBot.create(:terraform_template) }
 
     context "when miq_task.job present" do
@@ -127,6 +128,63 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Stack 
       let(:miq_task) { FactoryBot.create(:miq_task, :job => job) }
 
       it_behaves_like "terraform runner stdout not available from miq_task"
+    end
+  end
+
+  describe "#raw_stdout_via_worker" do
+    let(:stack) { FactoryBot.create(:terraform_stack) }
+
+    context "when embedded_terraform role is enabled" do
+      before do
+        EmbeddedTerraformEvmSpecHelper.assign_embedded_terraform_role
+
+        allow_any_instance_of(ManageIQ::Providers::EmbeddedTerraform::AutomationManager::ConfigurationScriptSource).to receive(:checkout_git_repository)
+      end
+
+      describe "#raw_stdout_via_worker with no errors" do
+        before do
+          EvmSpecHelper.local_miq_server
+          allow(described_class).to receive(:find).and_return(stack)
+
+          allow(MiqTask).to receive(:wait_for_taskid) do
+            request = MiqQueue.find_by(:class_name => described_class.name)
+            request.update(:state => MiqQueue::STATE_DEQUEUE)
+            request.deliver_and_process
+          end
+        end
+
+        it "gets stdout from the job" do
+          expect(stack).to receive(:raw_stdout).and_return("A stdout from the job")
+          taskid = stack.raw_stdout_via_worker("user")
+          MiqTask.wait_for_taskid(taskid)
+          expect(MiqTask.find(taskid)).to have_attributes(
+            :task_results => "A stdout from the job",
+            :status       => "Ok"
+          )
+        end
+
+        it "returns the error message" do
+          expect(stack).to receive(:raw_stdout).and_throw("Failed to get stdout from the job")
+          taskid = stack.raw_stdout_via_worker("user")
+          MiqTask.wait_for_taskid(taskid)
+          expect(MiqTask.find(taskid).message).to include("Failed to get stdout from the job")
+          expect(MiqTask.find(taskid).status).to eq("Error")
+        end
+      end
+    end
+
+    context "when embedded_terraform role is disabled" do
+      describe "#raw_stdout_via_worker return error" do
+        let(:role_enabled) { false }
+
+        it "returns an error message" do
+          taskid = stack.raw_stdout_via_worker("user")
+          expect(MiqTask.find(taskid)).to have_attributes(
+            :message => "Cannot get standard output of this terraform-template because the embedded terraform role is not enabled",
+            :status  => "Error"
+          )
+        end
+      end
     end
   end
 end
