@@ -18,24 +18,23 @@ module Terraform
       # Run a template, initiates terraform-runner job for running a template, via terraform-runner api
       #
       # @param input_vars [Hash] Hash with key/value pairs that will be passed as input variables to the
-      #        terraform-runner run, (execpt :miq_action && :miq_terraform_stack_id used for 'Retirement')
+      #        terraform-runner run, (execpt :miq_action && :miq_terraform_runner_stack_id used for 'Retirement')
       #        Note: To run Retirement(delete stack) required vars:
       #              - :miq_action=>'Retirement'
-      #              - :miq_terraform_stack_id=>{{stack_id-from-terraform-runner}}
+      #              - :miq_terraform_runner_stack_id=>{{stack_id-from-terraform-runner}}
       # @param tags [Hash] Hash with key/values pairs that will be passed as tags to the terraform-runner run
       # @param credentials [Array] List of Authentication objects to provide to the terraform run
       # @param env_vars [Hash] Hash with key/value pairs that will be passed as environment variables to the
       #        terraform-runner run
       # @return [Terraform::Runner::ResponseAsync] Response object of terraform-runner create action
       def run_async(input_vars, template_path, tags: nil, credentials: [], env_vars: {})
-        action   = input_vars.key?(:miq_action) ? input_vars[:miq_action].downcase : nil
-        stack_id = input_vars.key?(:miq_terraform_stack_id) ? input_vars[:miq_terraform_stack_id] : nil
+        action   = input_vars[:miq_action]
+        stack_id = input_vars[:miq_terraform_runner_stack_id]
         input_vars.delete(:miq_action)
-        input_vars.delete(:miq_terraform_stack_id)
-        input_vars.delete(:miq_service_instance_id)
+        input_vars.delete(:miq_terraform_runner_stack_id)
 
         case action
-        when 'retirement'
+        when ResourceAction::RETIREMENT
           #  ===== DELETE =====
           if stack_id.present?
             _log.debug("Run_aysnc/delete_stack('#{stack_id}') for template: #{template_path}")
@@ -48,8 +47,8 @@ module Terraform
             )
             Terraform::Runner::ResponseAsync.new(response.stack_id)
           else
-            _log.error("'miq_terraform_stack_id' is required for Retirement action, was not passed")
-            raise "'miq_terraform_stack_id' is required for Retirement action, was not passed"
+            _log.error("'miq_terraform_runner_stack_id' is required for Retirement action, was not passed")
+            raise "'miq_terraform_runner_stack_id' is required for Retirement action, was not passed"
           end
         else
           # ===== CREATE =====

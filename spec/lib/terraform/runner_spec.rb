@@ -228,9 +228,9 @@ RSpec.describe(Terraform::Runner) do
 
       let(:input_vars) do
         {
-          'name'                  => 'New World',
-          :miq_action             => 'Retirement',
-          :miq_terraform_stack_id => @hello_world_retrieve_delete_response['stack_id']
+          'name'                         => 'New World',
+          :miq_action                    => 'Retirement',
+          :miq_terraform_runner_stack_id => @hello_world_retrieve_delete_response['stack_id']
         }
       end
 

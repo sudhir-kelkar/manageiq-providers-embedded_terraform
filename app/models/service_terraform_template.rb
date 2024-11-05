@@ -76,23 +76,37 @@ class ServiceTerraformTemplate < ServiceGeneric
 
   private
 
+  def job(action)
+    stack(action).miq_task.job
+  rescue err
+    _log.error("Could not fetch #{action} Job", err)
+    nil
+  end
+
   def get_job_options(action)
-    case action.downcase
-    when 'retirement'
-      retire_job_options = options[job_option_key('retirement')].deep_dup
-      retire_job_options[:action] = action
-      prov_job_options = options[job_option_key('provision')].deep_dup
-      # if not already available in retirement options, (won't be available for terraform)
-      # copy extra_vars,execution_ttl,verbosity,credentials,etc from provision action
-      job_options = prov_job_options.deep_merge(retire_job_options)
-    else
-      job_options = options[job_option_key(action)].deep_dup
-    end
+    job_options = options[job_option_key(action)].deep_dup
 
     # Add additional vars,
-    #  :miq_action              - required for Retirement action
-    #  :miq_service_instance_id - use in Provision action to update stack_id in Service, later needed in Retirement action.
-    job_options[:extra_vars][:miq_service_instance_id] = id
+    # :miq_action                    -> required for Retirement action
+    # :miq_terraform_runner_stack_id -> Terraform-Runner stack_id required by Retirement action.
+
+    case action
+    when ResourceAction::RETIREMENT
+      prov_job = job(ResourceAction::PROVISION)
+      if prov_job.present? && prov_job.options.present?
+        # Copy input-vars from Provision(terraform apply) action,
+        # the Retirement(terraform destroy) action will use same input-vars/values.
+        if prov_job.options.key?(:input_vars) && prov_job.options[:input_vars].key?(:extra_vars)
+          prov_vars = prov_job.options[:input_vars][:extra_vars].deep_dup
+          job_options[:extra_vars] = prov_vars.deep_merge(job_options[:extra_vars])
+        end
+
+        # stack_id for terraform-runner
+        job_options[:extra_vars][:miq_terraform_runner_stack_id] = prov_job.options[:terraform_stack_id]
+      end
+    end
+
+    # current action, required to identify Retirement action
     job_options[:extra_vars][:miq_action] = action
 
     job_options
