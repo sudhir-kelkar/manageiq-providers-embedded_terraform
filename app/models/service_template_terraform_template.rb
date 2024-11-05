@@ -8,7 +8,7 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
   end
 
   def self.default_retirement_entry_point
-    '/Service/Generic/StateMachines/GenericLifecycle/Retire_Basic_Resource'
+    '/Service/Generic/StateMachines/GenericLifecycle/Retire_Advanced_Resource_None'
   end
 
   def self.create_catalog_item(options, _auth_user)
@@ -62,9 +62,6 @@ class ServiceTemplateTerraformTemplate < ServiceTemplate
 
   def terraform_template(action)
     template_id = config_info.dig(action.downcase.to_sym, :configuration_script_payload_id)
-    if template_id.nil? && action.downcase == 'retirement'
-      template_id = config_info.dig(:provision, :configuration_script_payload_id)
-    end
     return if template_id.nil?
 
     ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Template.find(template_id)
