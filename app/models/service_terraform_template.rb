@@ -87,16 +87,13 @@ class ServiceTerraformTemplate < ServiceGeneric
     # :miq_action                    -> required for Retirement action
     # :miq_terraform_runner_stack_id -> Terraform-Runner stack_id required by Retirement action.
 
-    case action
-    when ResourceAction::RETIREMENT
+    if action == ResourceAction::RETIREMENT
       prov_job = job(ResourceAction::PROVISION)
       if prov_job.present? && prov_job.options.present?
         # Copy input-vars from Provision(terraform apply) action,
         # the Retirement(terraform destroy) action will use same input-vars/values.
-        if prov_job.options.key?(:input_vars) && prov_job.options[:input_vars].key?(:extra_vars)
-          prov_vars = prov_job.options[:input_vars][:extra_vars].deep_dup
-          job_options[:extra_vars] = prov_vars.deep_merge(job_options[:extra_vars])
-        end
+        prov_vars = prov_job.options.dig(:input_vars, :extra_vars)
+        job_options[:extra_vars] = prov_vars.deep_merge!(job_options[:extra_vars]) if prov_vars
 
         # stack_id for terraform-runner
         job_options[:extra_vars][:miq_terraform_runner_stack_id] = prov_job.options[:terraform_stack_id]
