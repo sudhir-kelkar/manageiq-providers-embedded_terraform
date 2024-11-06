@@ -77,10 +77,7 @@ class ServiceTerraformTemplate < ServiceGeneric
   private
 
   def job(action)
-    stack(action).miq_task.job
-  rescue err
-    _log.error("Could not fetch #{action} Job", err)
-    nil
+    stack(action)&.miq_task&.job
   end
 
   def get_job_options(action)
