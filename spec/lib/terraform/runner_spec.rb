@@ -63,7 +63,7 @@ RSpec.describe(Terraform::Runner) do
       let(:input_vars) { {'name' => 'New World'} }
 
       it "start running hello-world terraform template" do
-        async_response = Terraform::Runner.run_async(input_vars, File.join(__dir__, "runner/data/hello-world"))
+        async_response = Terraform::Runner.run_async(File.join(__dir__, "runner/data/hello-world"), :input_vars => input_vars)
         expect(create_stub).to(have_been_requested.times(1))
 
         response = async_response.response
@@ -78,7 +78,7 @@ RSpec.describe(Terraform::Runner) do
       end
 
       it "handles trailing '/' in template path" do
-        async_response = Terraform::Runner.run_async(input_vars, File.join(__dir__, "runner/data/hello-world/"))
+        async_response = Terraform::Runner.run_async(File.join(__dir__, "runner/data/hello-world/"), :input_vars => input_vars)
         expect(create_stub).to(have_been_requested.times(1))
 
         response = async_response.response
@@ -165,7 +165,7 @@ RSpec.describe(Terraform::Runner) do
       let(:input_vars) { {} }
 
       it "start running, then stop the before it completes" do
-        async_response = Terraform::Runner.run_async(input_vars, File.join(__dir__, "runner/data/hello-world"))
+        async_response = Terraform::Runner.run_async(File.join(__dir__, "runner/data/hello-world"), :input_vars => input_vars)
         expect(create_stub).to(have_been_requested.times(1))
         expect(retrieve_stub).to(have_been_requested.times(0))
 
@@ -226,16 +226,15 @@ RSpec.describe(Terraform::Runner) do
                                )
       end
 
-      let(:input_vars) do
-        {
-          'name'                         => 'New World',
-          :miq_action                    => 'Retirement',
-          :miq_terraform_runner_stack_id => @hello_world_retrieve_delete_response['stack_id']
-        }
-      end
+      let(:input_vars) { {'name' => 'New World'} }
 
       it "start running retirement for hello-world terraform template stack" do
-        async_response = Terraform::Runner.run_async(input_vars, File.join(__dir__, "runner/data/hello-world"))
+        async_response = Terraform::Runner.run_async(
+          File.join(__dir__, "runner/data/hello-world"),
+          :input_vars => input_vars,
+          :action     => ResourceAction::RETIREMENT,
+          :stack_id   => @hello_world_retrieve_delete_response['stack_id']
+        )
         expect(delete_stub).to(have_been_requested.times(1))
 
         response = async_response.response
@@ -311,8 +310,8 @@ RSpec.describe(Terraform::Runner) do
 
       it "start running terraform template with amazon credential" do
         Terraform::Runner.run_async(
-          input_vars,
           File.join(__dir__, "runner/data/hello-world"),
+          :input_vars  => input_vars,
           :credentials => [amazon_cred]
         )
         expect(create_stub).to(have_been_requested.times(1))
@@ -393,8 +392,8 @@ RSpec.describe(Terraform::Runner) do
 
       it "start running terraform template with vSphere & ibmcloud credentials" do
         Terraform::Runner.run_async(
-          input_vars,
           File.join(__dir__, "runner/data/hello-world"),
+          :input_vars  => input_vars,
           :credentials => [vsphere_cred, ibmcloud_cred]
         )
         expect(create_stub).to(have_been_requested.times(1))

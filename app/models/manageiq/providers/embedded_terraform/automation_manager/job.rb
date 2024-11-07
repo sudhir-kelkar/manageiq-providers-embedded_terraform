@@ -21,9 +21,18 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
   def execute
     template_path = File.join(options[:git_checkout_tempdir], template_relative_path)
     credentials   = Authentication.where(:id => options[:credentials])
-    extra_vars    = options.dig(:input_vars, :extra_vars) || {}
+    input_vars    = options.dig(:input_vars, :extra_vars) || {}
+    action        = options.dig(:input_vars, :action) || nil
+    terraform_stack_id = options.dig(:input_vars, :terraform_stack_id) || nil # required in case of Retirement action
 
-    response = Terraform::Runner.run(decrypt_extra_vars(extra_vars), template_path, :credentials => credentials, :env_vars => options[:env_vars])
+    response = Terraform::Runner.run(
+      template_path,
+      :input_vars  => decrypt_input_vars(input_vars),
+      :credentials => credentials,
+      :env_vars    => options[:env_vars],
+      :action      => action,
+      :stack_id    => terraform_stack_id
+    )
 
     options[:terraform_stack_id] = response.stack_id
     save!
@@ -106,8 +115,8 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
     @stack_response ||= Terraform::Runner::ResponseAsync.new(options[:terraform_stack_id])
   end
 
-  def decrypt_extra_vars(extra_vars)
-    result = extra_vars.deep_dup
+  def decrypt_input_vars(input_vars)
+    result = input_vars.deep_dup
     result.transform_values! { |val| val.kind_of?(String) ? ManageIQ::Password.try_decrypt(val) : val }
   end
 

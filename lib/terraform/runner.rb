@@ -15,24 +15,19 @@ module Terraform
         @available = false
       end
 
-      # Run a template, initiates terraform-runner job for running a template, via terraform-runner api
+      # Run a terraform template. Initiate terraform-runner stack job for running a template, via terraform-runner api.
+      # By default will run Provision action job, if no action & stack_id is passed.
       #
-      # @param input_vars [Hash] Hash with key/value pairs that will be passed as input variables to the
-      #        terraform-runner run, (execpt :miq_action && :miq_terraform_runner_stack_id used for 'Retirement')
-      #        Note: To run Retirement(delete stack) required vars:
-      #              - :miq_action=>'Retirement'
-      #              - :miq_terraform_runner_stack_id=>{{stack_id-from-terraform-runner}}
-      # @param tags [Hash] Hash with key/values pairs that will be passed as tags to the terraform-runner run
-      # @param credentials [Array] List of Authentication objects to provide to the terraform run
-      # @param env_vars [Hash] Hash with key/value pairs that will be passed as environment variables to the
-      #        terraform-runner run
-      # @return [Terraform::Runner::ResponseAsync] Response object of terraform-runner create action
-      def run_async(input_vars, template_path, tags: nil, credentials: [], env_vars: {})
-        action   = input_vars[:miq_action]
-        stack_id = input_vars[:miq_terraform_runner_stack_id]
-        input_vars.delete(:miq_action)
-        input_vars.delete(:miq_terraform_runner_stack_id)
-
+      # @param template_path [String] (required) path to the terraform template directory.
+      # @param input_vars    [Hash]   (optional) key/value pairs as input variables for the terraform-runner run job.
+      # @param tags          [Hash]   (optional) key/value pairs tags for terraform-runner Provisioned resources.
+      # @param credentials   [Array]  (optional) List of Authentication objects for the terraform run job.
+      # @param env_vars      [Hash]   (optional) key/value pairs used as environment variables, for terraform-runner run job.
+      # @param action        [String] (optional) type of action, use ResourceAction::PROVISION or ResourceAction::RETIREMENT.
+      # @param stack_id      [String] (optional) required, if running ResourceAction::RETIREMENT action, used by Terraform-Runner stack_delete job.
+      #
+      # @return [Terraform::Runner::ResponseAsync] Response object of terraform-runner api call
+      def run_async(template_path, input_vars: {}, tags: nil, credentials: [], env_vars: {}, action: ResourceAction::PROVISION, stack_id: nil)
         case action
         when ResourceAction::RETIREMENT
           #  ===== DELETE =====
@@ -45,10 +40,9 @@ module Terraform
               :credentials => credentials,
               :env_vars    => env_vars
             )
-            Terraform::Runner::ResponseAsync.new(response.stack_id)
           else
-            _log.error("'miq_terraform_runner_stack_id' is required for Retirement action, was not passed")
-            raise "'miq_terraform_runner_stack_id' is required for Retirement action, was not passed"
+            _log.error("'stack_id' is required for #{ResourceAction::RETIREMENT} action")
+            raise "'stack_id' is required for #{ResourceAction::RETIREMENT} action"
           end
         else
           # ===== CREATE =====
@@ -60,15 +54,23 @@ module Terraform
             :credentials => credentials,
             :env_vars    => env_vars
           )
-          Terraform::Runner::ResponseAsync.new(response.stack_id)
         end
+        Terraform::Runner::ResponseAsync.new(response.stack_id)
       end
 
       # To simplify clients who may just call run, we alias it to call
       # run_async.  If we ever need run_sync, we'll need to revisit this.
       alias run run_async
 
-      # Stop running terraform-runner job by stack_id
+      # To simplify clients who want to create-stack, we alias it to call run_async
+      alias create_stack run_async
+
+      # Delete(destroy) terraform-runner created stack resources.
+      def delete_stack(stack_id, template_path, input_vars, credentials: [], env_vars: {})
+        run_async(template_path, input_vars, nil, credentials, env_vars, ResourceAction::RETIREMENT, stack_id)
+      end
+
+      # Stop running terraform-runner job, by stack_id
       #
       # @param stack_id [String] stack_id from the terraforn-runner job
       #
@@ -77,14 +79,20 @@ module Terraform
         cancel_stack_job(stack_id)
       end
 
-      # Fetch terraform-runner job result/status by stack_id
+      # To simplify clients who want to stop a running stack job, we alias it to call stop_async
+      alias stop_stack stop_async
+
+      # Fetch stack object(with result/status), by stack_id from terraform-runner
       #
-      # @param stack_id [String] stack_id from the terraforn-runner job
+      # @param stack_id [String] stack_id for the terraforn-runner stack job
       #
       # @return [Terraform::Runner::Response] Response object with result of terraform run
       def fetch_result_by_stack_id(stack_id)
         retrieve_stack_job(stack_id)
       end
+
+      # To simplify clients who want to fetch stack object from terraform-runner
+      alias stack fetch_result_by_stack_id
 
       # Parse Terraform Template input/output variables
       # @param template_path [String] Path to the template we will want to parse for input/output variables
@@ -149,7 +157,7 @@ module Terraform
       # Create TerraformRunner Stack Job
       def create_stack_job(
         template_path,
-        input_vars: [],
+        input_vars: {},
         tags: nil,
         credentials: [],
         env_vars: {},
@@ -181,7 +189,7 @@ module Terraform
       def delete_stack_job(
         stack_id,
         template_path,
-        input_vars: [],
+        input_vars: {},
         credentials: [],
         env_vars: {}
       )

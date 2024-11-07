@@ -83,10 +83,6 @@ class ServiceTerraformTemplate < ServiceGeneric
   def get_job_options(action)
     job_options = options[job_option_key(action)].deep_dup
 
-    # Add additional vars,
-    # :miq_action                    -> required for Retirement action
-    # :miq_terraform_runner_stack_id -> Terraform-Runner stack_id required by Retirement action.
-
     if action == ResourceAction::RETIREMENT
       prov_job = job(ResourceAction::PROVISION)
       if prov_job.present? && prov_job.options.present?
@@ -95,13 +91,13 @@ class ServiceTerraformTemplate < ServiceGeneric
         prov_vars = prov_job.options.dig(:input_vars, :extra_vars)
         job_options[:extra_vars] = prov_vars.deep_merge!(job_options[:extra_vars]) if prov_vars
 
-        # stack_id for terraform-runner
-        job_options[:extra_vars][:miq_terraform_runner_stack_id] = prov_job.options[:terraform_stack_id]
+        # add stack_id for terraform-runner
+        job_options[:terraform_stack_id] = prov_job.options[:terraform_stack_id]
       end
     end
 
     # current action, required to identify Retirement action
-    job_options[:extra_vars][:miq_action] = action
+    job_options[:action] = action
 
     job_options
   end
