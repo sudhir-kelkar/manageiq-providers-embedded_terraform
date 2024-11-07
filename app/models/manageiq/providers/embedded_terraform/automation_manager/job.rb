@@ -1,11 +1,13 @@
 class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
-  def self.create_job(template, env_vars, input_vars, credentials, poll_interval: 1.minute)
+  def self.create_job(template, env_vars, input_vars, credentials, action: ResourceAction::PROVISION, terraform_stack_id: nil, poll_interval: 1.minute)
     super(
-      :template_id   => template.id,
-      :env_vars      => env_vars,
-      :input_vars    => input_vars,
-      :credentials   => credentials,
-      :poll_interval => poll_interval,
+      :template_id        => template.id,
+      :env_vars           => env_vars,
+      :input_vars         => input_vars,
+      :credentials        => credentials,
+      :poll_interval      => poll_interval,
+      :action             => action,
+      :terraform_stack_id => terraform_stack_id
     )
   end
 
@@ -22,29 +24,27 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
     template_path = File.join(options[:git_checkout_tempdir], template_relative_path)
     credentials   = Authentication.where(:id => options[:credentials])
     input_vars    = options.dig(:input_vars, :extra_vars) || {}
-    action        = options.dig(:input_vars, :action) || nil
-    terraform_stack_id = options.dig(:input_vars, :terraform_stack_id) || nil # required in case of Retirement action
+    action        = options[:action]
 
-    response = case action
-               when ResourceAction::RETIREMENT
-                 Terraform::Runner.delete_stack(
-                   terraform_stack_id,
-                   template_path,
-                   :input_vars  => decrypt_input_vars(input_vars),
-                   :credentials => credentials,
-                   :env_vars    => options[:env_vars]
-                 )
-               else
-                 Terraform::Runner.create_stack(
-                   template_path,
-                   :input_vars  => decrypt_input_vars(input_vars),
-                   :credentials => credentials,
-                   :env_vars    => options[:env_vars]
-                 )
-               end
-
-    options[:terraform_stack_id] = response.stack_id
-    save!
+    case action
+    when ResourceAction::RETIREMENT
+      Terraform::Runner.delete_stack(
+        options[:terraform_stack_id],
+        template_path,
+        :input_vars  => decrypt_input_vars(input_vars),
+        :credentials => credentials,
+        :env_vars    => options[:env_vars]
+      )
+    else
+      response = Terraform::Runner.create_stack(
+        template_path,
+        :input_vars  => decrypt_input_vars(input_vars),
+        :credentials => credentials,
+        :env_vars    => options[:env_vars]
+      )
+      options[:terraform_stack_id] = response.stack_id
+      save!
+    end
 
     queue_poll_runner
   end
