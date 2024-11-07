@@ -4,7 +4,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Template < Mana
   def run(vars = {}, _userid = nil)
     env_vars    = vars.delete(:env) || {}
     credentials = vars.delete(:credentials)
-    action = vars.delete(:action)
+    action = vars.delete(:action) || ResourceAction::PROVISION
     terraform_stack_id = vars.delete(:terraform_stack_id)
 
     self.class.module_parent::Job.create_job(

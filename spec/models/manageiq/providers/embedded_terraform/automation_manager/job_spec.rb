@@ -3,8 +3,9 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job do
   let(:job)         { described_class.create_job(template, env_vars, input_vars, credentials).tap { |job| job.state = state } }
   let(:state)       { "waiting_to_start" }
   let(:env_vars)    { {} }
-  let(:input_vars)  { {} }
+  let(:input_vars)  { {:extra_vars => {}} }
   let(:credentials) { [] }
+  let(:terraform_stack_id) { '999-999-999-999' }
 
   describe ".create_job" do
     it "create a job" do
@@ -16,7 +17,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job do
           :input_vars         => input_vars,
           :credentials        => credentials,
           :poll_interval      => 60,
-          :action             => "Provision",
+          :action             => ResourceAction::PROVISION,
           :terraform_stack_id => nil
         }
       )
@@ -25,7 +26,7 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job do
     it "create a job for Retirement action" do
       expect(
         described_class.create_job(
-          template, env_vars, input_vars, credentials, :action => ResourceAction::RETIREMENT, :terraform_stack_id => '999-999-999'
+          template, env_vars, input_vars, credentials, :action => ResourceAction::RETIREMENT, :terraform_stack_id => terraform_stack_id
         )
       ).to have_attributes(
         :type    => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job",
@@ -35,8 +36,8 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job do
           :input_vars         => input_vars,
           :credentials        => credentials,
           :poll_interval      => 60,
-          :action             => 'Retirement',
-          :terraform_stack_id => '999-999-999'
+          :action             => ResourceAction::RETIREMENT,
+          :terraform_stack_id => terraform_stack_id
         }
       )
     end
