@@ -31,14 +31,14 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
       Terraform::Runner.delete_stack(
         options[:terraform_stack_id],
         template_path,
-        :input_vars  => decrypt_input_vars(input_vars),
+        :input_vars  => decrypt_vars(input_vars),
         :credentials => credentials,
         :env_vars    => options[:env_vars]
       )
     else
       response = Terraform::Runner.create_stack(
         template_path,
-        :input_vars  => decrypt_input_vars(input_vars),
+        :input_vars  => decrypt_vars(input_vars),
         :credentials => credentials,
         :env_vars    => options[:env_vars]
       )
@@ -124,9 +124,8 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
     @stack_response ||= Terraform::Runner::ResponseAsync.new(options[:terraform_stack_id])
   end
 
-  def decrypt_input_vars(input_vars)
-    result = input_vars.deep_dup
-    result.transform_values! { |val| val.kind_of?(String) ? ManageIQ::Password.try_decrypt(val) : val }
+  def decrypt_vars(input_vars)
+    input_vars.transform_values! { |val| val.kind_of?(String) ? ManageIQ::Password.try_decrypt(val) : val }
   end
 
   def configuration_script_source
