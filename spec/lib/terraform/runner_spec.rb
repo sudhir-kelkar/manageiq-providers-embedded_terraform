@@ -77,6 +77,21 @@ RSpec.describe(Terraform::Runner) do
         expect(response.details).to(be_nil)
       end
 
+      it "create_stack for hello-world terraform template" do
+        async_response = Terraform::Runner.create_stack(File.join(__dir__, "runner/data/hello-world"), :input_vars => input_vars)
+        expect(create_stub).to(have_been_requested.times(1))
+
+        response = async_response.response
+        expect(retrieve_stub).to(have_been_requested.times(1))
+
+        expect(response.status).to(eq('IN_PROGRESS'), "terraform-runner failed with:\n#{response.status}")
+        expect(response.stack_id).to(eq(@hello_world_create_response['stack_id']))
+        expect(response.action).to(eq('CREATE'))
+        expect(response.stack_name).to(eq(@hello_world_create_response['stack_name']))
+        expect(response.message).to(be_nil)
+        expect(response.details).to(be_nil)
+      end
+
       it "handles trailing '/' in template path" do
         async_response = Terraform::Runner.run_async(File.join(__dir__, "runner/data/hello-world/"), :input_vars => input_vars)
         expect(create_stub).to(have_been_requested.times(1))
@@ -234,6 +249,26 @@ RSpec.describe(Terraform::Runner) do
           :input_vars => input_vars,
           :action     => ResourceAction::RETIREMENT,
           :stack_id   => @hello_world_retrieve_delete_response['stack_id']
+        )
+        expect(delete_stub).to(have_been_requested.times(1))
+
+        response = async_response.response
+        expect(delete_retrieve_stub).to(have_been_requested.times(1))
+        expect(response.stack_id).to(eq(@hello_world_delete_response['stack_id']))
+        expect(response.action).to(eq('DELETE'))
+        expect(response.stack_name).to(eq(@hello_world_delete_response['stack_name']))
+
+        expect(response.status).to(eq('SUCCESS'), "terraform-runner failed with:\n#{response.status}")
+        expect(response.message).to(include('Destroy complete! Resources: 1 destroyed.'))
+        expect(response.details).to(eq({"resources" => [], "outputs" => []}))
+      end
+
+      it "delete_stack for hello-world terraform template" do
+        stack_id = @hello_world_retrieve_delete_response['stack_id']
+        async_response = Terraform::Runner.delete_stack(
+          stack_id,
+          File.join(__dir__, "runner/data/hello-world"),
+          :input_vars => input_vars
         )
         expect(delete_stub).to(have_been_requested.times(1))
 

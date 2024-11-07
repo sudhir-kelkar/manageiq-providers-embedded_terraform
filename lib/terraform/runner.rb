@@ -66,8 +66,13 @@ module Terraform
       alias create_stack run_async
 
       # Delete(destroy) terraform-runner created stack resources.
-      def delete_stack(stack_id, template_path, input_vars, credentials: [], env_vars: {})
-        run_async(template_path, input_vars, nil, credentials, env_vars, ResourceAction::RETIREMENT, stack_id)
+      def delete_stack(stack_id, template_path, input_vars: {}, credentials: [], env_vars: {})
+        run_async(template_path,
+                  :input_vars  => input_vars,
+                  :credentials => credentials,
+                  :env_vars    => env_vars,
+                  :action      => ResourceAction::RETIREMENT,
+                  :stack_id    => stack_id)
       end
 
       # Stop running terraform-runner job, by stack_id

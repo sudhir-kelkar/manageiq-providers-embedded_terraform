@@ -25,14 +25,23 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
     action        = options.dig(:input_vars, :action) || nil
     terraform_stack_id = options.dig(:input_vars, :terraform_stack_id) || nil # required in case of Retirement action
 
-    response = Terraform::Runner.run(
-      template_path,
-      :input_vars  => decrypt_input_vars(input_vars),
-      :credentials => credentials,
-      :env_vars    => options[:env_vars],
-      :action      => action,
-      :stack_id    => terraform_stack_id
-    )
+    response = case action
+               when ResourceAction::RETIREMENT
+                 Terraform::Runner.delete_stack(
+                   terraform_stack_id,
+                   template_path,
+                   :input_vars  => decrypt_input_vars(input_vars),
+                   :credentials => credentials,
+                   :env_vars    => options[:env_vars]
+                 )
+               else
+                 Terraform::Runner.create_stack(
+                   template_path,
+                   :input_vars  => decrypt_input_vars(input_vars),
+                   :credentials => credentials,
+                   :env_vars    => options[:env_vars]
+                 )
+               end
 
     options[:terraform_stack_id] = response.stack_id
     save!
