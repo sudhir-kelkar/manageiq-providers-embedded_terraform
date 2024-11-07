@@ -21,6 +21,25 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job do
         }
       )
     end
+
+    it "create a job for Retirement action" do
+      expect(
+        described_class.create_job(
+          template, env_vars, input_vars, credentials, :action => ResourceAction::RETIREMENT, :terraform_stack_id => '999-999-999'
+        )
+      ).to have_attributes(
+        :type    => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job",
+        :options => {
+          :template_id        => template.id,
+          :env_vars           => env_vars,
+          :input_vars         => input_vars,
+          :credentials        => credentials,
+          :poll_interval      => 60,
+          :action             => 'Retirement',
+          :terraform_stack_id => '999-999-999'
+        }
+      )
+    end
   end
 
   describe "#signal" do
