@@ -1,6 +1,6 @@
 RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job do
   let(:template)    { FactoryBot.create(:terraform_template) }
-  let(:job)         { described_class.create_job(template, env_vars, input_vars, credentials).tap { |job| job.state = state} }
+  let(:job)         { described_class.create_job(template, env_vars, input_vars, credentials).tap { |job| job.state = state } }
   let(:state)       { "waiting_to_start" }
   let(:env_vars)    { {} }
   let(:input_vars)  { {} }
@@ -11,11 +11,13 @@ RSpec.describe ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job do
       expect(described_class.create_job(template, env_vars, input_vars, credentials)).to have_attributes(
         :type    => "ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job",
         :options => {
-          :template_id   => template.id,
-          :env_vars      => env_vars,
-          :input_vars    => input_vars,
-          :credentials   => credentials,
-          :poll_interval => 60
+          :template_id        => template.id,
+          :env_vars           => env_vars,
+          :input_vars         => input_vars,
+          :credentials        => credentials,
+          :poll_interval      => 60,
+          :action             => "Provision",
+          :terraform_stack_id => nil
         }
       )
     end
