@@ -15,34 +15,15 @@ module Terraform
         @available = false
       end
 
-      # Run a terraform template. Initiate terraform-runner stack job for running a template, via terraform-runner api.
-      # By default will run Provision action job, if no action & stack_id is passed.
+      # Provision or Create (terraform apply) stack in terraform-runner from a terraform template.
       #
       # @param template_path [String] (required) path to the terraform template directory.
       # @param input_vars    [Hash]   (optional) key/value pairs as input variables for the terraform-runner run job.
       # @param tags          [Hash]   (optional) key/value pairs tags for terraform-runner Provisioned resources.
       # @param credentials   [Array]  (optional) List of Authentication objects for the terraform run job.
       # @param env_vars      [Hash]   (optional) key/value pairs used as environment variables, for terraform-runner run job.
-      # @param action        [String] (optional) type of action, use ResourceAction::PROVISION or ResourceAction::RETIREMENT.
-      # @param stack_id      [String] (optional) required, if running ResourceAction::RETIREMENT action, used by Terraform-Runner stack_delete job.
       #
       # @return [Terraform::Runner::ResponseAsync] Response object of terraform-runner api call
-      def run_async(template_path, input_vars: {}, tags: nil, credentials: [], env_vars: {}, action: ResourceAction::PROVISION, stack_id: nil)
-        case action
-        when ResourceAction::RETIREMENT
-          #  ===== DELETE =====
-          delete_stack(stack_id, template_path, :input_vars => input_vars, :credentials => credentials, :env_vars => env_vars)
-        else
-          # ===== CREATE =====
-          create_stack(template_path, :input_vars => input_vars, :tags => tags, :credentials => credentials, :env_vars => env_vars)
-        end
-      end
-
-      # To simplify clients who may just call run, we alias it to call
-      # run_async.  If we ever need run_sync, we'll need to revisit this.
-      alias run run_async
-
-      # Provision or Create (terraform apply) stack in terraform-runner from a terraform template.
       def create_stack(template_path, input_vars: {}, tags: nil, credentials: [], env_vars: {})
         _log.debug("Run_aysnc/create_stack for template: #{template_path}")
         if template_path.present?
@@ -60,6 +41,14 @@ module Terraform
       end
 
       # Retire or Delete(terraform destroy) the terraform-runner created stack resources.
+      #
+      # @param stack_id      [String] (optional) required, if running ResourceAction::RETIREMENT action, used by Terraform-Runner stack_delete job.
+      # @param template_path [String] (required) path to the terraform template directory.
+      # @param input_vars    [Hash]   (optional) key/value pairs as input variables for the terraform-runner run job.
+      # @param credentials   [Array]  (optional) List of Authentication objects for the terraform run job.
+      # @param env_vars      [Hash]   (optional) key/value pairs used as environment variables, for terraform-runner run job.
+      #
+      # @return [Terraform::Runner::ResponseAsync] Response object of terraform-runner api call
       def delete_stack(stack_id, template_path, input_vars: {}, credentials: [], env_vars: {})
         if stack_id.present? && template_path.present?
           _log.debug("Run_aysnc/delete_stack('#{stack_id}') for template: #{template_path}")
