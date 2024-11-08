@@ -125,7 +125,7 @@ class ManageIQ::Providers::EmbeddedTerraform::AutomationManager::Job < Job
   end
 
   def decrypt_vars(input_vars)
-    input_vars.transform_values! { |val| val.kind_of?(String) ? ManageIQ::Password.try_decrypt(val) : val }
+    input_vars.transform_values { |val| val.kind_of?(String) ? ManageIQ::Password.try_decrypt(val) : val }
   end
 
   def configuration_script_source
