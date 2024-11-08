@@ -31,22 +31,21 @@ module Terraform
         case action
         when ResourceAction::RETIREMENT
           #  ===== DELETE =====
-          if stack_id.present?
-            _log.debug("Run_aysnc/delete_stack('#{stack_id}') for template: #{template_path}")
-            response = delete_stack_job(
-              stack_id,
-              template_path,
-              :input_vars  => input_vars,
-              :credentials => credentials,
-              :env_vars    => env_vars
-            )
-          else
-            _log.error("'stack_id' is required for #{ResourceAction::RETIREMENT} action")
-            raise "'stack_id' is required for #{ResourceAction::RETIREMENT} action"
-          end
+          delete_stack(stack_id, template_path, :input_vars => input_vars, :credentials => credentials, :env_vars => env_vars)
         else
           # ===== CREATE =====
-          _log.debug("Run_aysnc/create_stack for template: #{template_path}")
+          create_stack(template_path, :input_vars => input_vars, :tags => tags, :credentials => credentials, :env_vars => env_vars)
+        end
+      end
+
+      # To simplify clients who may just call run, we alias it to call
+      # run_async.  If we ever need run_sync, we'll need to revisit this.
+      alias run run_async
+
+      # Provision or Create (terraform apply) stack in terraform-runner from a terraform template.
+      def create_stack(template_path, input_vars: {}, tags: nil, credentials: [], env_vars: {})
+        _log.debug("Run_aysnc/create_stack for template: #{template_path}")
+        if template_path.present?
           response = create_stack_job(
             template_path,
             :input_vars  => input_vars,
@@ -54,25 +53,28 @@ module Terraform
             :credentials => credentials,
             :env_vars    => env_vars
           )
+          Terraform::Runner::ResponseAsync.new(response.stack_id)
+        else
+          raise "'template_path' is required for #{ResourceAction::Provision} action"
         end
-        Terraform::Runner::ResponseAsync.new(response.stack_id)
       end
 
-      # To simplify clients who may just call run, we alias it to call
-      # run_async.  If we ever need run_sync, we'll need to revisit this.
-      alias run run_async
-
-      # To simplify clients who want to create-stack, we alias it to call run_async
-      alias create_stack run_async
-
-      # Delete(destroy) terraform-runner created stack resources.
+      # Retire or Delete(terraform destroy) the terraform-runner created stack resources.
       def delete_stack(stack_id, template_path, input_vars: {}, credentials: [], env_vars: {})
-        run_async(template_path,
-                  :input_vars  => input_vars,
-                  :credentials => credentials,
-                  :env_vars    => env_vars,
-                  :action      => ResourceAction::RETIREMENT,
-                  :stack_id    => stack_id)
+        if stack_id.present? && template_path.present?
+          _log.debug("Run_aysnc/delete_stack('#{stack_id}') for template: #{template_path}")
+          response = delete_stack_job(
+            stack_id,
+            template_path,
+            :input_vars  => input_vars,
+            :credentials => credentials,
+            :env_vars    => env_vars
+          )
+          Terraform::Runner::ResponseAsync.new(response.stack_id)
+        else
+          _log.error("'stack_id' && 'template_path' are required for #{ResourceAction::RETIREMENT} action")
+          raise "'stack_id' && 'template_path' are required for #{ResourceAction::RETIREMENT} action"
+        end
       end
 
       # Stop running terraform-runner job, by stack_id
