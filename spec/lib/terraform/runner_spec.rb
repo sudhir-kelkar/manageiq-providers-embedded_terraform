@@ -22,8 +22,8 @@ RSpec.describe(Terraform::Runner) do
 
   describe "is .available" do
     before do
-      stub_request(:get, "#{terraform_runner_url}/ping")
-        .to_return(:status => 200, :body => {'count' => 0}.to_json)
+      stub_request(:get, "#{terraform_runner_url}/live")
+        .to_return(:status => 200, :body => {:status => "UP", :checks => []}.to_json)
     end
 
     it "check if terraform-runner service is available" do
